@@ -1,0 +1,18 @@
+{
+	"compilerOptions": {
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"strictPropertyInitialization": false,
+		"target": "ES2020",
+		"module": "commonjs",
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"moduleResolution": "node",
+		"types": ["node"]
+	},
+	"include": ["src/**/*", "src/knexfile.ts", "src/db/index.ts", ".env"],
+	"exclude": ["node_modules"]
+}

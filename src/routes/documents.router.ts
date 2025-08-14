@@ -1,0 +1,224 @@
+import { Router } from "express";
+import documentsController from "../controllers/documents.controller";
+
+const docsRouter = Router();
+
+/**
+ * @swagger
+ * tags:
+ *   name: Documents
+ *   description: Управление документами
+ */
+
+/**
+ * @swagger
+ * /api/documents:
+ *   get:
+ *     summary: Получить список всех документов
+ *     tags: [Documents]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Document'
+*/
+docsRouter.get("/", documentsController.getAll);
+
+/**
+ * @swagger
+ * /api/documents:
+ *   post:
+ *     summary: Создать документ
+ *     tags: [Documents]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *               projectId:
+ *                 type: number
+ *     responses:
+ *       201:
+ *         description: Document created successfully
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+docsRouter.post("/", documentsController.create);
+
+/**
+ * @swagger
+ * /api/documents/{id}:
+ *   get:
+ *     summary: Получить документ по ID
+ *     tags: [Documents]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID документа
+ *     responses:
+ *       200:
+ *         description: Document data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Project'
+ *       404:
+ *         description: Bad request
+ */
+docsRouter.get("/:id", documentsController.getOne);
+
+/**
+ * @swagger
+ * /api/documents/{id}/name:
+ *   patch:
+ *     summary: Изменить название документа
+ *     tags: [Documents]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID документа
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Document data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+docsRouter.patch("/:id/name", documentsController.updateName);
+
+/**
+ * @swagger
+ * /api/documents/{id}/project:
+ *   patch:
+ *     summary: Изменить проект документа
+ *     tags: [Documents]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID документа
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - projectId
+ *             properties:
+ *               projectId:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Document data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+docsRouter.patch("/:id/project", documentsController.updateProject);
+
+/**
+ * @swagger
+ * /api/documents/{id}/content:
+ *   patch:
+ *     summary: Изменить содержимое документа
+ *     tags: [Documents]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID документа
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - content
+ *             properties:
+ *               content:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Document data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+docsRouter.patch("/:id/content", documentsController.updateContent);
+
+/**
+ * @swagger
+ * /api/documents/{id}:
+ *   delete:
+ *     summary: Удалить документ
+ *     tags: [Documents]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID документа
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
+ *       404:
+ *         description: Bad request
+ */
+docsRouter.delete("/:id", documentsController.delete);
+
+export { docsRouter }

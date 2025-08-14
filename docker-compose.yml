@@ -1,0 +1,31 @@
+services:
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      DATABASE_DIALECT: postgres
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - /home/site/db:/var/lib/postgresql/data
+    ports:
+      - ${DB_PORT}:5432
+  backend:
+    build: .
+    restart: always
+    environment:
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_HOST: postgres
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_PORT: ${DB_PORT}
+      HOST: ${HOST}
+      PORT: ${PORT}
+      JWT_ACCESSTOKEN_KEY: ${JWT_ACCESSTOKEN_KEY}
+      JWT_REFRESHTOKEN_KEY: ${JWT_REFRESHTOKEN_KEY}
+    ports: 
+    - 8081:8080
+    depends_on:
+      - postgres

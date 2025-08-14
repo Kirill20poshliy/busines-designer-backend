@@ -1,0 +1,100 @@
+import { Request, Response } from "express";
+import { IAuthRequest } from "../types/types";
+import projectsService from "../services/projects.service";
+
+class ProjectsController {
+    async create(req: IAuthRequest, res: Response) {
+        try {
+            const { name } = req.body as { name: string };
+            const userId = req.userId;
+
+            if (!userId) {
+                return res
+                    .status(400)
+                    .json({ message: "Current user ID are required" });
+            }
+
+            const optUserId = Number(userId);
+
+            const data = await projectsService.create(name, optUserId);
+
+            res.status(200).json(data);
+        } catch (e) {
+            console.log(e);
+            res.status(500).json({ message: `Error creating project -> ${e}` });
+        }
+    }
+
+    async getAll(req: IAuthRequest, res: Response) {
+        try {
+            const userId = req.userId;
+
+            if (!userId) {
+                return res
+                    .status(400)
+                    .json({ message: "Current user ID are required" });
+            }
+
+            const optUserId = Number(userId);
+
+            const data = await projectsService.getAll(optUserId);
+
+            res.status(200).json(data);
+        } catch (e) {
+            console.log(e);
+            res.status(500).json({ message: `Error getting projects -> ${e}` });
+        }
+    }
+
+    async getOne(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+
+            const data = await projectsService.getOne(Number(id));
+
+            res.status(200).json(data);
+        } catch (e) {
+            console.log(e);
+            res.status(500).json({ message: `Error getting project -> ${e}` });
+        }
+    }
+
+    async updateName(req: IAuthRequest, res: Response) {
+        try {
+            const { id } = req.params;
+            const { name } = req.body as { name: string };
+            const userId = req.userId;
+            const optUserId = Number(userId);
+
+            const data = await projectsService.updateName(
+                Number(id),
+                name,
+                optUserId
+            );
+
+            res.status(200).json(data);
+        } catch (e) {
+            console.log(e);
+            res.status(500).json({ message: `Error updating project -> ${e}` });
+        }
+    }
+
+    async delete(req: IAuthRequest, res: Response) {
+        try {
+            const { id } = req.params;
+            const userId = req.userId;
+            const optUserId = Number(userId);
+
+            const data = await projectsService.delete(Number(id), optUserId);
+
+            res.status(200).json(data);
+        } catch (e) {
+            console.log(e);
+            res.status(500).json({
+                message: `Error deleteing project -> ${e}`,
+            });
+        }
+    }
+}
+
+export default new ProjectsController();
