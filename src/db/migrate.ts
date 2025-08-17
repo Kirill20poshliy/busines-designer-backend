@@ -8,7 +8,7 @@ const MIGRATIONS_DIR = path.join(__dirname, "migrations");
 const runMigrations = async () => {
 	console.log('Starting migration...\n')
     const client = await pool.connect();
-
+    
     try {
         await client.query(`
 			CREATE TABLE IF NOT EXISTS migrations (

@@ -2,24 +2,20 @@
  * @swagger
  * components:
  *   schemas:
- *     Document:
+ *     File:
  *       type: object
  *       properties:
  *         id:
  *           type: number
- *         name:
+ *         type:
  *           type: string
- *         content:
+ *         url:
  *           type: string
- *         project_id:
+ *         object_id:
  *           type: number
- *         project_name:
- *           type: string
- *         pict_url:
- *           type: string
  *         author_id:
  *           type: number
- *         author_name:
+ *         mime_type:
  *           type: string
  *         created_at:
  *           type: string
@@ -27,15 +23,13 @@
  *           type: string
  *         
  */
-export interface IDocument {
+export interface IFile {
     id: number;
-    name: string;
-    content: string;
-    project_id: number;
-    project_name: string;
-    pict_url: string | null;
+    type: string;
+    url: string;
+    object_id: number;
     author_id: number;
-    author_name: string;
+    mime_type: string;
     created_at: string;
     updated_at: string;
 }

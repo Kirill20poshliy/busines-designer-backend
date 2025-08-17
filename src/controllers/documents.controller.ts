@@ -5,7 +5,7 @@ import documentsService from "../services/documents.service";
 class DocumentsController {
     async create(req: IAuthRequest, res: Response) {
         try {
-            const { name, projectId } = req.body as { name: string, projectId?: number };
+            const { name, projectId } = req.body as { name: string, projectId: number };
             const userId = req.userId;
 
             if (!userId) {
@@ -18,7 +18,7 @@ class DocumentsController {
 
             const data = await documentsService.create(name, optUserId, projectId);
 
-            res.status(200).json(data);
+            res.status(201).json(data);
         } catch (e) {
             console.log(e);
             res.status(500).json({
@@ -127,6 +127,35 @@ class DocumentsController {
                 message: `Error updating document -> ${e}`,
             });
         }
+    }
+
+    async updatePicture(req: IAuthRequest, res: Response) {
+        try {
+            if (!req.file) {
+                return res.status(400).json({ error: "No file uploaded" });
+            }
+
+            const userId = req.userId;
+
+            if (!userId) {
+                return res
+                    .status(400)
+                    .json({ message: "Current user ID are required" });
+            }
+
+
+            const { id } = req.params;
+            const optUserId = Number(userId);
+            const filePath = req.file.path;
+            const mimetype = req.file.mimetype;
+
+            const data = await documentsService.updatePicture(optUserId, Number(id), filePath, mimetype);
+
+            res.status(201).json(data);
+        } catch (e) {
+            console.log(e)
+            res.status(500).json({ message: `Error updating document picture -> ${e}` });
+                }
     }
 
     async delete(req: IAuthRequest, res: Response) {

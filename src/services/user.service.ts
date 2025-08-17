@@ -1,18 +1,33 @@
 import { pool } from "../db";
 import { IUser, IUserInfo } from "../models/user.model";
-import bcrypt from "bcryptjs"
+import bcrypt from "bcryptjs";
+import filesService from "./files.service";
 
 class UserService {
-    async create(email: string, password: string): Promise<IUserInfo> {
+    async create(
+        email: string,
+        password: string,
+        firstname?: string,
+        lastname?: string
+    ): Promise<IUserInfo> {
         const client = await pool.connect();
         const data = await client.query<IUserInfo>(
             `
             INSERT INTO users (
                 email, 
-                password
-            ) VALUES ($1, $2)
+                password,
+                firstname,
+                lastname,
+                name,
+            ) VALUES ($1, $2, $3, $4, $5)
             RETURNING id, email, created_at`,
-            [email, password]
+            [
+                email,
+                password,
+                firstname ?? null,
+                lastname ?? null,
+                firstname || lastname ? [lastname, firstname].join(" ") : null,
+            ]
         );
 
         if (!data) {
@@ -22,12 +37,16 @@ class UserService {
         return data.rows[0];
     }
 
-    async getAll(): Promise<{data: IUserInfo[]}> {
+    async getAll(): Promise<{ data: IUserInfo[] }> {
         const client = await pool.connect();
         const data = await client.query<IUserInfo>(`
             SELECT 
                 id,
                 email,
+                firstname,
+                lastname,
+                name,
+                pict_url,
                 created_at
             FROM users`);
 
@@ -35,16 +54,20 @@ class UserService {
             throw new Error("Error while getting users.");
         }
 
-        return {data: data.rows};
+        return { data: data.rows };
     }
 
-    async getOne(id: number): Promise<{data: IUserInfo}> {
+    async getOne(id: number): Promise<{ data: IUserInfo }> {
         const client = await pool.connect();
         const data = await client.query<IUserInfo>(
             `
             SELECT
                 id,
                 email,
+                firstname,
+                lastname,
+                name,
+                pict_url,
                 created_at
             FROM users
             WHERE id = $1
@@ -56,10 +79,10 @@ class UserService {
             throw new Error(`Error while getting user "${id}".`);
         }
 
-        return {data: data.rows[0] || null};
+        return { data: data.rows[0] || null };
     }
 
-    async getOneByEmail(email: string): Promise<{data: IUser}> {
+    async getOneByEmail(email: string): Promise<{ data: IUser }> {
         const client = await pool.connect();
         const data = await client.query<IUser>(
             `
@@ -78,7 +101,7 @@ class UserService {
             throw new Error(`Error while getting user with email: "${email}".`);
         }
 
-        return {data: data.rows[0] || null};
+        return { data: data.rows[0] || null };
     }
 
     async updateEmail(
@@ -112,7 +135,7 @@ class UserService {
             throw new Error("Password are required!.");
         }
 
-        const hashPass = await bcrypt.hash(body.password, 3)
+        const hashPass = await bcrypt.hash(body.password, 3);
 
         const client = await pool.connect();
         const data = await client.query(
@@ -124,7 +147,95 @@ class UserService {
         );
 
         if (!data) {
-            throw new Error(`Error while user "${id}" passeord updating.`);
+            throw new Error(`Error while user "${id}" password updating.`);
+        }
+
+        return { message: "success" };
+    }
+
+    async updateFirstname(
+        id: number,
+        firstname: string
+    ): Promise<{ message: string }> {
+        const client = await pool.connect();
+
+        const user = await this.getOne(id);
+
+        if (!user) {
+            throw new Error(`User with id: "${id}" doesn't exists.`);
+        }
+
+        const data = await client.query(
+            `
+            UPDATE users
+            SET firstname = $1, name = $2, updated_at = NOW()
+            WHERE id = $3;`,
+            [firstname, [user.data.lastname, firstname].join(" "), id]
+        );
+
+        if (!data) {
+            throw new Error(`Error while user "${id}" firstname updating.`);
+        }
+
+        return { message: "success" };
+    }
+
+    async updateLastname(
+        id: number,
+        lastname: string
+    ): Promise<{ message: string }> {
+        const client = await pool.connect();
+
+        const user = await this.getOne(id);
+
+        if (!user) {
+            throw new Error(`User with id: "${id}" doesn't exists.`);
+        }
+
+        const data = await client.query(
+            `
+            UPDATE users
+            SET lastname = $1, name = $2, updated_at = NOW()
+            WHERE id = $3;`,
+            [lastname, [lastname, user.data.firstname].join(" "), id]
+        );
+
+        if (!data) {
+            throw new Error(`Error while user "${id}" lastname updating.`);
+        }
+
+        return { message: "success" };
+    }
+
+    async updateAvatar(
+        userId: number,
+        filePath: string,
+        mimetype: string
+    ): Promise<{ message: string }> {
+        const fileData = await filesService.upload(
+            userId,
+            filePath,
+            "user",
+            userId,
+            mimetype
+        );
+
+        if (!fileData) {
+            throw new Error(`Unable to upload file.`);
+        }
+
+        const client = await pool.connect();
+
+        const data = client.query(
+            `
+            UPDATE users
+            SET pict_url = $1
+            WHERE id = $2`,
+            [fileData.photoUrl, userId]
+        );
+
+        if (!data) {
+            throw new Error(`Error while user "${userId}" avatar updating.`);
         }
 
         return { message: "success" };
@@ -132,15 +243,16 @@ class UserService {
 
     async delete(id: number): Promise<{ message: string }> {
         const client = await pool.connect();
-        const data = await client.query(`
+        const data = await client.query(
+            `
             DELETE 
             FROM users 
             WHERE id = $1`,
             [id]
-        )
+        );
 
         if (!data) {
-            throw new Error(`Error while user "${id}" deleteing.`)
+            throw new Error(`Error while user "${id}" deleteing.`);
         }
 
         return { message: "success" };

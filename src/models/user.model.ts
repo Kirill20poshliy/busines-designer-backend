@@ -47,11 +47,21 @@ export interface IUserCredentials {
  *           type: string
  *         password:
  *           type: string
+ *         firstname:
+ *           type: string
+ *         lastname:
+ *           type: string
+ *         pict_url:
+ *           type: string
  *         createdAt:
  *           type: string
  *         
  */
 export interface IUser extends IUserDto, IUserCredentials {
+    firstname: string;
+    lastname: string;
+    name: string;
+    pict_url: string;
     created_at: string;
 }
 

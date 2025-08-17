@@ -8,7 +8,9 @@ import { IUserDto } from "../models/user.model";
 class AuthService {
     async register(
         email: string,
-        password: string
+        password: string,
+        firstname?: string,
+        lastname?: string,
     ): Promise<ITokens & { data: IUserDto }> {
         const candidate = await userService.getOneByEmail(email);
 
@@ -18,7 +20,7 @@ class AuthService {
 
         const hashPass = await bcrypt.hash(password, 3);
 
-        const user = await userService.create(email, hashPass);
+        const user = await userService.create(email, hashPass, firstname, lastname);
 
         const userDto = new UserDto(user.id, user.email);
 

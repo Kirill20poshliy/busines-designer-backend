@@ -18,7 +18,7 @@ class ProjectsController {
 
             const data = await projectsService.create(name, optUserId);
 
-            res.status(200).json(data);
+            res.status(201).json(data);
         } catch (e) {
             console.log(e);
             res.status(500).json({ message: `Error creating project -> ${e}` });
@@ -77,6 +77,35 @@ class ProjectsController {
             console.log(e);
             res.status(500).json({ message: `Error updating project -> ${e}` });
         }
+    }
+
+    async updatePicture(req: IAuthRequest, res: Response) {
+        try {
+            if (!req.file) {
+                return res.status(400).json({ error: "No file uploaded" });
+            }
+
+            const userId = req.userId;
+
+            if (!userId) {
+                return res
+                    .status(400)
+                    .json({ message: "Current user ID are required" });
+            }
+
+
+            const { id } = req.params;
+            const optUserId = Number(userId);
+            const filePath = req.file.path;
+            const mimetype = req.file.mimetype;
+
+            const data = await projectsService.updatePicture(optUserId, Number(id), filePath, mimetype);
+
+            res.status(201).json(data);
+        } catch (e) {
+            console.log(e)
+            res.status(500).json({ message: `Error updating project picture -> ${e}` });
+                }
     }
 
     async delete(req: IAuthRequest, res: Response) {

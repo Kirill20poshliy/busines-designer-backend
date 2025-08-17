@@ -1,5 +1,6 @@
 import { Router } from "express";
 import documentsController from "../controllers/documents.controller";
+import { uploadPhoto } from "../utils/files";
 
 const docsRouter = Router();
 
@@ -43,6 +44,7 @@ docsRouter.get("/", documentsController.getAll);
  *             type: object
  *             required:
  *               - name
+ *               - projectId
  *             properties:
  *               name:
  *                 type: string
@@ -77,7 +79,7 @@ docsRouter.post("/", documentsController.create);
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Project'
+ *               $ref: '#/components/schemas/File'
  *       404:
  *         description: Bad request
  */
@@ -199,6 +201,45 @@ docsRouter.patch("/:id/project", documentsController.updateProject);
  *         description: Bad request
  */
 docsRouter.patch("/:id/content", documentsController.updateContent);
+
+/**
+ * @swagger
+ * /api/documents/{id}/picture:
+ *   patch:
+ *     summary: Изменить изображение документа
+ *     tags: [Documents]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID документа
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               photo:
+ *                 type: string
+ *                 format: binary
+ *                 description: Файл изображения (JPEG, PNG)
+ *     responses:
+ *       200:
+ *         description: Document data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+docsRouter.patch("/:id/picture", uploadPhoto, documentsController.updatePicture);
 
 /**
  * @swagger

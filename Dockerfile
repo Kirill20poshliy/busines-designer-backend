@@ -16,6 +16,8 @@ WORKDIR /usr/app/backend
 
 COPY --from=builder /usr/app/backend .
 
+RUN mkdir -p /usr/app/backend/uploads
+
 EXPOSE 8080
 
 CMD ["node", "dist/app.js"]
