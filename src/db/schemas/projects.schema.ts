@@ -2,8 +2,10 @@ export const ProjectSchema = `
     CREATE TABLE IF NOT EXISTS projects (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
+        pict_url TEXT,
         author_id INTEGER,
         FOREIGN KEY (author_id) REFERENCES users(id),
+        author_name VARCHAR(256),
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
     );

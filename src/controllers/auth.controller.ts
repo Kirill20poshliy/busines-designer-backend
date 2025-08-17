@@ -8,7 +8,7 @@ import { UserDto } from "../dtos/user.dto";
 class AuthController {
     async register(req: Request, res: Response) {
         try {
-            const { email, password } = req.body;
+            const { email, password, firstname, lastname } = req.body;
     
             if (!email || !password) {
                 return res
@@ -16,7 +16,7 @@ class AuthController {
                     .json({ message: "Login and password are required" });
             }
 
-            const result = await authService.register(email, password)
+            const result = await authService.register(email, password, firstname, lastname)
 
             res.status(201).json(result);
         } catch (e) {

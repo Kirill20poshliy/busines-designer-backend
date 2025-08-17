@@ -1,73 +1,94 @@
-import { pool } from "../db"
-import { IProject } from "../models/project.model"
+import { pool } from "../db";
+import { IProject } from "../models/project.model";
+import filesService from "./files.service";
+import userService from "./user.service";
 
 class ProjectsService {
-    async create(name: string, authorId: number): Promise<{data: IProject}> {
-        const optAuthorId = Number(authorId)
+    async create(name: string, authorId: number): Promise<{ data: IProject }> {
+        const optAuthorId = Number(authorId);
 
         const client = await pool.connect();
-        const data = await client.query<IProject>(`
-            INSERT INTO projects (
-                name,
-                author_id
-            ) VALUES ($1, $2)
-            RETURNING *`,
-            [name, optAuthorId]
-        )
 
-        if (!data) {
-            throw new Error('Error while creating project.')
+        const author = await userService.getOne(optAuthorId);
+
+        if (author.data === null) {
+            throw new Error(`Project cannot exist without an author`)
         }
 
-        return {data: data.rows[0]}
+        const data = await client.query<IProject>(
+            `
+            INSERT INTO projects (
+                name,
+                author_id,
+                author_name
+            ) VALUES ($1, $2, $3)
+            RETURNING *`,
+            [name, optAuthorId, author.data.name]
+        );
+
+        if (!data) {
+            throw new Error("Error while creating project.");
+        }
+
+        return { data: data.rows[0] };
     }
 
-    async getAll(userId: number): Promise<{data: IProject[]}> {
-        const client = await pool.connect()
-        const data = await client.query<IProject>(`
+    async getAll(userId: number): Promise<{ data: IProject[] }> {
+        const client = await pool.connect();
+        const data = await client.query<IProject>(
+            `
             SELECT
                 id,
                 name,
                 author_id,
+                author_name,
+                pict_url,
                 created_at,
                 updated_at
             FROM projects
             WHERE author_id = $1
             ORDER BY updated_at DESC`,
             [userId]
-        )
+        );
 
         if (!data) {
-            throw new Error('Error while getting projects.')
+            throw new Error("Error while getting projects.");
         }
 
-        return {data: data.rows}
+        return { data: data.rows };
     }
 
-    async getOne(id: number): Promise<{data: IProject}> {
-        const client = await pool.connect()
-        const data = await client.query<IProject>(`
+    async getOne(id: number): Promise<{ data: IProject }> {
+        const client = await pool.connect();
+        const data = await client.query<IProject>(
+            `
             SELECT
                 id,
                 name,
                 author_id,
+                author_name,
+                pict_url,
                 created_at,
                 updated_at
             FROM projects
             WHERE id = $1
             LIMIT 1`,
             [id]
-        )
+        );
 
         if (!data) {
-            throw new Error(`Error while getting project "${id}".`)
+            throw new Error(`Error while getting project "${id}".`);
         }
 
-        return {data: data.rows[0] || null}
+        return { data: data.rows[0] || null };
     }
 
-    async updateName(id: number, name: string, authorId: number): Promise<{message: string}> {
-        const client = await pool.connect()
+    async updateName(
+        id: number,
+        name: string,
+        authorId: number
+    ): Promise<{ message: string }> {
+        const client = await pool.connect();
         const data = await client.query(
             `
             UPDATE projects
@@ -81,25 +102,63 @@ class ProjectsService {
             throw new Error(`Error while project "${id}" name updating.`);
         }
 
-        return {message: 'success'}
+        return { message: "success" };
+    }
+
+    async updatePicture(
+        userId: number,
+        objectId: number,
+        filePath: string,
+        mimetype: string
+    ): Promise<{ message: string }> {
+        const fileData = await filesService.upload(
+            userId,
+            filePath,
+            "project",
+            objectId,
+            mimetype
+        );
+
+        if (!fileData) {
+            throw new Error(`Unable to upload file.`);
+        }
+
+        const client = await pool.connect();
+
+        const data = client.query(
+            `
+            UPDATE projects
+            SET pict_url = $1
+            WHERE id = $2`,
+            [fileData.photoUrl, objectId]
+        );
+
+        if (!data) {
+            throw new Error(
+                `Error while project "${objectId}" picture updating.`
+            );
+        }
+
+        return { message: "success" };
     }
 
     async delete(id: number, authorId: number) {
         const client = await pool.connect();
-        const data = await client.query(`
+        const data = await client.query(
+            `
             DELETE 
             FROM projects 
             WHERE id = $1
                 AND author_id = $2`,
             [id, authorId]
-        )
+        );
 
         if (!data) {
-            throw new Error(`Error while project "${id}" deleteing.`)
+            throw new Error(`Error while project "${id}" deleteing.`);
         }
 
         return { message: "success" };
     }
 }
 
-export default new ProjectsService()
+export default new ProjectsService();

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import userController from "../controllers/user.controller";
+import { uploadPhoto } from "../utils/files";
 
 const usersRouter = Router();
 
@@ -136,5 +137,122 @@ usersRouter.patch('/:id/email', userController.updateEmail);
  *         description: Bad request
  */
 usersRouter.patch('/:id/password', userController.updatePassword);
+
+/**
+ * @swagger
+ * /api/users/{id}/firstname:
+ *   patch:
+ *     summary: Изменить Имя пользователя
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID пользователя
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - firstname
+ *             properties:
+ *               firstname:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+usersRouter.patch('/:id/firstname', userController.updateFirstname);
+
+/**
+ * @swagger
+ * /api/users/{id}/lastname:
+ *   patch:
+ *     summary: Изменить Фамилию пользователя
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID пользователя
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - lastname
+ *             properties:
+ *               lastname:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+usersRouter.patch('/:id/lastname', userController.updateLastname);
+
+/**
+ * @swagger
+ * /api/users/{id}/avatar:
+ *   patch:
+ *     summary: Изменить avatar пользователя
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID пользователя
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               photo:
+ *                 type: string
+ *                 format: binary
+ *                 description: Файл изображения (JPEG, PNG)
+ *     responses:
+ *       200:
+ *         description: Updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+usersRouter.patch('/:id/avatar', uploadPhoto, userController.updateAvatar);
 
 export { usersRouter }

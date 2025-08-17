@@ -1,29 +1,37 @@
 import { pool } from "../db";
 import { IDocument } from "../models/document.model";
+import filesService from "./files.service";
 import projectsService from "./projects.service";
+import userService from "./user.service";
 
 class DocumentsService {
-    async create(name: string, authorId: number, projectId?: number): Promise<{data: IDocument}> {
+    async create(name: string, authorId: number, projectId: number): Promise<{data: IDocument}> {
         const optAuthorId = Number(authorId);
 
         const client = await pool.connect();
 
-        if (projectId) {
-            const project = await projectsService.getOne(projectId);
+        const author = await userService.getOne(optAuthorId);
 
-            if (!project) {
-                throw new Error('The specified project does not exist.')
-            }
+        if (author.data === null) {
+            throw new Error(`Project cannot exist without an author`)
+        }
+
+        const project = await projectsService.getOne(projectId);
+
+        if (project.data === null) {
+            throw new Error('The specified project does not exist.')
         }
 
         const data = await client.query<IDocument>(`
             INSERT INTO documents (
                 name,
                 author_id,
-                project_id
-            ) VALUES ($1, $2, $3)
+                author_name,
+                project_id,
+                project_name
+            ) VALUES ($1, $2, $3, $4, $5)
             RETURNING *`,
-            [name, optAuthorId, projectId || null]
+            [name, optAuthorId, author.data.name, projectId, project.data.name]
         )
 
         if (!data) {
@@ -40,7 +48,10 @@ class DocumentsService {
                 id,
                 name,
                 project_id,
+                project_name,
                 author_id,
+                author_name,
+                pict_url,
                 created_at,
                 updated_at
             FROM documents
@@ -62,9 +73,11 @@ class DocumentsService {
             SELECT
                 id,
                 name,
-                content,
                 project_id,
+                project_name,
                 author_id,
+                author_name,
+                pict_url,
                 created_at,
                 updated_at
             FROM documents
@@ -132,6 +145,43 @@ class DocumentsService {
         }
 
         return {message: 'success'}
+    }
+
+    async updatePicture(
+        userId: number,
+        objectId: number,
+        filePath: string,
+        mimetype: string
+    ): Promise<{ message: string }> {
+        const fileData = await filesService.upload(
+            userId,
+            filePath,
+            "document",
+            objectId,
+            mimetype
+        );
+
+        if (!fileData) {
+            throw new Error(`Unable to upload file.`);
+        }
+
+        const client = await pool.connect();
+
+        const data = client.query(
+            `
+            UPDATE documents
+            SET pict_url = $1
+            WHERE id = $2`,
+            [fileData.photoUrl, objectId]
+        );
+
+        if (!data) {
+            throw new Error(
+                `Error while document "${objectId}" picture updating.`
+            );
+        }
+
+        return { message: "success" };
     }
 
     async delete(id: number, authorId: number) {

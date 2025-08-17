@@ -1,5 +1,6 @@
 import { Router } from "express";
 import projectsController from "../controllers/projects.controller";
+import { uploadPhoto } from "../utils/files";
 
 const projectsRouter = Router();
 
@@ -119,6 +120,45 @@ projectsRouter.get("/:id", projectsController.getOne);
  *         description: Bad request
  */
 projectsRouter.patch("/:id/name", projectsController.updateName);
+
+/**
+ * @swagger
+ * /api/projects/{id}/picture:
+ *   patch:
+ *     summary: Изменить изображение проекта
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID проекта
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               photo:
+ *                 type: string
+ *                 format: binary
+ *                 description: Файл изображения (JPEG, PNG)
+ *     responses:
+ *       200:
+ *         description: Project data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+projectsRouter.patch("/:id/picture", uploadPhoto, projectsController.updatePicture);
 
 /**
  * @swagger
