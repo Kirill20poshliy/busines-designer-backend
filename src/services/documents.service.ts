@@ -10,8 +10,6 @@ class DocumentsService {
         authorId: string,
         projectId: string
     ): Promise<{ data: IDocument }> {
-        const client = await pool.connect();
-
         const author = await userService.getOne(authorId);
 
         if (author.data === null) {
@@ -24,7 +22,7 @@ class DocumentsService {
             throw new Error("The specified project does not exist.");
         }
 
-        const data = await client.query<IDocument>(
+        const data = await pool.query<IDocument>(
             `
             INSERT INTO documents (
                 name,
@@ -47,8 +45,7 @@ class DocumentsService {
     async getAll(
         projectId: string
     ): Promise<{ data: Omit<IDocument, "content">[] }> {
-        const client = await pool.connect();
-        const data = await client.query<Omit<IDocument, "content">>(
+        const data = await pool.query<Omit<IDocument, "content">>(
             `
             SELECT
                 id,
@@ -74,8 +71,7 @@ class DocumentsService {
     }
 
     async getOne(id: string): Promise<{ data: IDocument }> {
-        const client = await pool.connect();
-        const data = await client.query<IDocument>(
+        const data = await pool.query<IDocument>(
             `
             SELECT
                 id,
@@ -105,8 +101,7 @@ class DocumentsService {
         name: string,
         authorId: string
     ): Promise<{ message: string }> {
-        const client = await pool.connect();
-        const data = await client.query(
+        const data = await pool.query(
             `
             UPDATE documents
             SET 
@@ -130,8 +125,7 @@ class DocumentsService {
         projectId: string,
         authorId: string
     ): Promise<{ message: string }> {
-        const client = await pool.connect();
-        const data = await client.query(
+        const data = await pool.query(
             `
             UPDATE documents
             SET 
@@ -154,8 +148,7 @@ class DocumentsService {
         id: string,
         content: string
     ): Promise<{ message: string }> {
-        const client = await pool.connect();
-        const data = await client.query(
+        const data = await pool.query(
             `
             UPDATE documents
             SET 
@@ -191,9 +184,7 @@ class DocumentsService {
             throw new Error(`Unable to upload file.`);
         }
 
-        const client = await pool.connect();
-
-        const data = await client.query(
+        const data = await pool.query(
             `
             UPDATE documents
             SET 
@@ -215,9 +206,7 @@ class DocumentsService {
     }
 
     async deletePicture(documentId: string, authorId: string) {
-        const client = await pool.connect();
-
-        const deletable = await client.query(`
+        const deletable = await pool.query(`
             UPDATE documents
             SET 
                 pict_url = null,
@@ -236,8 +225,7 @@ class DocumentsService {
     }
 
     async delete(id: string, authorId: string) {
-        const client = await pool.connect();
-        const data = await client.query(
+        const data = await pool.query(
             `
             DELETE 
             FROM documents 
