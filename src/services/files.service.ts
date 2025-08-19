@@ -9,7 +9,7 @@ class FilesService {
         objectType: "user" | "project" | "document",
         objectId: number,
         mimetype: string
-    ): Promise<{ photoId: number; photoUrl: string }> {
+    ): Promise<{ photoId: string; photoUrl: string }> {
         const client = await pool.connect();
 
         const data = await client.query<IFile>(

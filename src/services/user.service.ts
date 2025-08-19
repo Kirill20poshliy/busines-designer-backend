@@ -57,7 +57,7 @@ class UserService {
         return { data: data.rows };
     }
 
-    async getOne(id: number): Promise<{ data: IUserInfo }> {
+    async getOne(id: string): Promise<{ data: IUserInfo }> {
         const client = await pool.connect();
         const data = await client.query<IUserInfo>(
             `
@@ -154,7 +154,7 @@ class UserService {
     }
 
     async updateFirstname(
-        id: number,
+        id: string,
         firstname: string
     ): Promise<{ message: string }> {
         const client = await pool.connect();
@@ -181,7 +181,7 @@ class UserService {
     }
 
     async updateLastname(
-        id: number,
+        id: string,
         lastname: string
     ): Promise<{ message: string }> {
         const client = await pool.connect();

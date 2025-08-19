@@ -1,6 +1,6 @@
 import { Router } from "express";
 import projectsController from "../controllers/projects.controller";
-import { uploadPhoto } from "../utils/files";
+import { uploadPhoto } from "../middleware/files.middleware";
 
 const projectsRouter = Router();
 
@@ -27,7 +27,7 @@ const projectsRouter = Router();
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Project'
-*/
+ */
 projectsRouter.get("/", projectsController.getAll);
 
 /**
@@ -158,7 +158,11 @@ projectsRouter.patch("/:id/name", projectsController.updateName);
  *       404:
  *         description: Bad request
  */
-projectsRouter.patch("/:id/picture", uploadPhoto, projectsController.updatePicture);
+projectsRouter.patch(
+    "/:id/picture",
+    uploadPhoto,
+    projectsController.updatePicture
+);
 
 /**
  * @swagger
@@ -181,4 +185,4 @@ projectsRouter.patch("/:id/picture", uploadPhoto, projectsController.updatePictu
  */
 projectsRouter.delete("/:id", projectsController.delete);
 
-export { projectsRouter }
+export { projectsRouter };

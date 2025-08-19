@@ -5,7 +5,7 @@ import documentsService from "../services/documents.service";
 class DocumentsController {
     async create(req: IAuthRequest, res: Response) {
         try {
-            const { name, projectId } = req.body as { name: string, projectId: number };
+            const { name, projectId } = req.body as { name: string, projectId: string };
             const userId = req.userId;
 
             if (!userId) {
@@ -14,9 +14,7 @@ class DocumentsController {
                     .json({ message: "Current user ID are required" });
             }
 
-            const optUserId = Number(userId);
-
-            const data = await documentsService.create(name, optUserId, projectId);
+            const data = await documentsService.create(name, userId, projectId);
 
             res.status(201).json(data);
         } catch (e) {
@@ -27,19 +25,17 @@ class DocumentsController {
         }
     }
 
-    async getAll(req: IAuthRequest, res: Response) {
+    async getAll(req: Request, res: Response) {
         try {
-            const userId = req.userId;
-
-            if (!userId) {
+            // const userId = req.userId;
+            const { project_id } = req.query as { project_id: string };
+            if (!project_id) {
                 return res
                     .status(400)
-                    .json({ message: "Current user ID are required" });
+                    .json({ message: "project_id query param are required" });
             }
 
-            const optUserId = Number(userId);
-
-            const data = await documentsService.getAll(optUserId);
+            const data = await documentsService.getAll(project_id);
 
             res.status(200).json(data);
         } catch (e) {

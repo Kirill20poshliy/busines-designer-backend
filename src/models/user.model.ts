@@ -6,13 +6,13 @@
  *       type: object
  *       properties:
  *         id:
- *           type: number
+ *           type: string
  *         email:
  *           type: string
  *         
  */
 export interface IUserDto {
-    id: number;
+    id: string;
     email: string;
 }
 
@@ -42,7 +42,7 @@ export interface IUserCredentials {
  *       type: object
  *       properties:
  *         id:
- *           type: number
+ *           type: string
  *         email:
  *           type: string
  *         password:
@@ -51,9 +51,13 @@ export interface IUserCredentials {
  *           type: string
  *         lastname:
  *           type: string
+ *         name:
+ *           type: string
  *         pict_url:
  *           type: string
- *         createdAt:
+ *         created_at:
+ *           type: string
+ *         updated_at:
  *           type: string
  *         
  */
@@ -63,6 +67,7 @@ export interface IUser extends IUserDto, IUserCredentials {
     name: string;
     pict_url: string;
     created_at: string;
+    updated_at: string;
 }
 
 /**
@@ -73,10 +78,20 @@ export interface IUser extends IUserDto, IUserCredentials {
  *       type: object
  *       properties:
  *         id:
- *           type: number
+ *           type: string
  *         email:
  *           type: string
+ *         firstname:
+ *           type: string
+ *         lastname:
+ *           type: string
+ *         name:
+ *           type: string
+ *         pict_url:
+ *           type: string
  *         createdAt:
+ *           type: string
+ *         updated_at:
  *           type: string
  *         
  */

@@ -34,13 +34,22 @@ const createSuperuser = async () => {
 
         const superuser = await client.query<IUser>(`
             INSERT INTO users (
+                firstname,
+                lastname,
+                name,
                 email,
                 password
             ) VALUES (
                 $1,
                 $2
             );`,
-            [email, hashPass]
+            [
+                'Иван', 
+                'Иванов', 
+                'Иванов Иван', 
+                email, 
+                hashPass
+            ]
         )
 
         if (!superuser) {

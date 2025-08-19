@@ -6,7 +6,7 @@
  *       type: object
  *       properties:
  *         id:
- *           type: number
+ *           type: string
  *         name:
  *           type: string
  *         pict_url:
@@ -22,7 +22,7 @@
  *         
  */
 export interface IProject {
-    id: number;
+    id: string;
     name: string;
     pict_url: string;
     author_id: number;

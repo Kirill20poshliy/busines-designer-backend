@@ -6,7 +6,7 @@
  *       type: object
  *       properties:
  *         id:
- *           type: number
+ *           type: string
  *         name:
  *           type: string
  *         content:
@@ -28,7 +28,7 @@
  *         
  */
 export interface IDocument {
-    id: number;
+    id: string;
     name: string;
     content: string;
     project_id: number;

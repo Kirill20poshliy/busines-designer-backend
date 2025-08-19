@@ -46,7 +46,7 @@ class TokensService {
     }
 
     async saveToken(
-        userId: number,
+        userId: string,
         refreshToken: string
     ): Promise<{ token: string }> {
         const client = await pool.connect();

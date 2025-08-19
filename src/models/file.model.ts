@@ -6,7 +6,7 @@
  *       type: object
  *       properties:
  *         id:
- *           type: number
+ *           type: string
  *         type:
  *           type: string
  *         url:
@@ -24,7 +24,7 @@
  *         
  */
 export interface IFile {
-    id: number;
+    id: string;
     type: string;
     url: string;
     object_id: number;

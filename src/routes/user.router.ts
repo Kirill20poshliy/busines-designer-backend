@@ -1,6 +1,6 @@
 import { Router } from "express";
 import userController from "../controllers/user.controller";
-import { uploadPhoto } from "../utils/files";
+import { uploadPhoto } from "../middleware/files.middleware";
 
 const usersRouter = Router();
 
@@ -29,7 +29,7 @@ const usersRouter = Router();
  *               items:
  *                 $ref: '#/components/schemas/UserInfo'
  */
-usersRouter.get('/', userController.getAll);
+usersRouter.get("/", userController.getAll);
 
 /**
  * @swagger
@@ -54,7 +54,7 @@ usersRouter.get('/', userController.getAll);
  *       404:
  *         description: Bad request
  */
-usersRouter.get('/:id', userController.getOne);
+usersRouter.get("/:id", userController.getOne);
 
 /**
  * @swagger
@@ -95,7 +95,7 @@ usersRouter.get('/:id', userController.getOne);
  *       404:
  *         description: Bad request
  */
-usersRouter.patch('/:id/email', userController.updateEmail);
+usersRouter.patch("/:id/email", userController.updateEmail);
 
 /**
  * @swagger
@@ -136,7 +136,7 @@ usersRouter.patch('/:id/email', userController.updateEmail);
  *       404:
  *         description: Bad request
  */
-usersRouter.patch('/:id/password', userController.updatePassword);
+usersRouter.patch("/:id/password", userController.updatePassword);
 
 /**
  * @swagger
@@ -175,7 +175,7 @@ usersRouter.patch('/:id/password', userController.updatePassword);
  *       404:
  *         description: Bad request
  */
-usersRouter.patch('/:id/firstname', userController.updateFirstname);
+usersRouter.patch("/:id/firstname", userController.updateFirstname);
 
 /**
  * @swagger
@@ -214,7 +214,7 @@ usersRouter.patch('/:id/firstname', userController.updateFirstname);
  *       404:
  *         description: Bad request
  */
-usersRouter.patch('/:id/lastname', userController.updateLastname);
+usersRouter.patch("/:id/lastname", userController.updateLastname);
 
 /**
  * @swagger
@@ -253,6 +253,6 @@ usersRouter.patch('/:id/lastname', userController.updateLastname);
  *       404:
  *         description: Bad request
  */
-usersRouter.patch('/:id/avatar', uploadPhoto, userController.updateAvatar);
+usersRouter.patch("/:id/avatar", uploadPhoto, userController.updateAvatar);
 
-export { usersRouter }
+export { usersRouter };

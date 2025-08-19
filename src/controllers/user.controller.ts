@@ -18,7 +18,7 @@ class UserController {
     async getOne(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const data = await userService.getOne(Number(id))
+            const data = await userService.getOne(id)
 
             res.status(200).json(data)
         } catch (e) {
@@ -57,7 +57,7 @@ class UserController {
         try {
             const { id } = req.params;
             const { firstname } = req.body;
-            const data = await userService.updateFirstname(Number(id), firstname);
+            const data = await userService.updateFirstname(id, firstname);
 
             res.status(201).json(data)
         } catch (e) {
@@ -70,7 +70,7 @@ class UserController {
         try {
             const { id } = req.params;
             const { lastname } = req.body;
-            const data = await userService.updateLastname(Number(id), lastname);
+            const data = await userService.updateLastname(id, lastname);
 
             res.status(201).json(data)
         } catch (e) {

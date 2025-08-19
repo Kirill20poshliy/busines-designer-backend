@@ -5,12 +5,10 @@ import projectsService from "./projects.service";
 import userService from "./user.service";
 
 class DocumentsService {
-    async create(name: string, authorId: number, projectId: number): Promise<{data: IDocument}> {
-        const optAuthorId = Number(authorId);
-
+    async create(name: string, authorId: string, projectId: string): Promise<{data: IDocument}> {
         const client = await pool.connect();
 
-        const author = await userService.getOne(optAuthorId);
+        const author = await userService.getOne(authorId);
 
         if (author.data === null) {
             throw new Error(`Project cannot exist without an author`)
@@ -31,7 +29,7 @@ class DocumentsService {
                 project_name
             ) VALUES ($1, $2, $3, $4, $5)
             RETURNING *`,
-            [name, optAuthorId, author.data.name, projectId, project.data.name]
+            [name, Number(authorId), author.data.name, projectId, project.data.name]
         )
 
         if (!data) {
@@ -41,7 +39,7 @@ class DocumentsService {
         return {data: data.rows[0]}
     }
 
-    async getAll(userId: number): Promise<{data: Omit<IDocument, 'content'>[]}> {
+    async getAll(projectId: string): Promise<{data: Omit<IDocument, 'content'>[]}> {
         const client = await pool.connect()
         const data = await client.query<Omit<IDocument, 'content'>>(`
             SELECT
@@ -55,9 +53,9 @@ class DocumentsService {
                 created_at,
                 updated_at
             FROM documents
-            WHERE author_id = $1
+            WHERE project_id = $1
             ORDER BY updated_at DESC`,
-            [userId]
+            [Number(projectId)]
         )
 
         if (!data) {
@@ -98,7 +96,9 @@ class DocumentsService {
         const data = await client.query(
             `
             UPDATE documents
-            SET name = $1, updated_at = NOW()
+            SET 
+                name = $1, 
+                updated_at = NOW()
             WHERE id = $2
                 AND author_id = $3;`,
             [name, id, authorId]
@@ -116,7 +116,9 @@ class DocumentsService {
         const data = await client.query(
             `
             UPDATE documents
-            SET project_id = $1, updated_at = NOW()
+            SET 
+                project_id = $1, 
+                updated_at = NOW()
             WHERE id = $2
                 AND author_id = $3;`,
             [projectId, id, authorId]

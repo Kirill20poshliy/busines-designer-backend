@@ -4,12 +4,10 @@ import filesService from "./files.service";
 import userService from "./user.service";
 
 class ProjectsService {
-    async create(name: string, authorId: number): Promise<{ data: IProject }> {
-        const optAuthorId = Number(authorId);
-
+    async create(name: string, authorId: string): Promise<{ data: IProject }> {
         const client = await pool.connect();
 
-        const author = await userService.getOne(optAuthorId);
+        const author = await userService.getOne(authorId);
 
         if (author.data === null) {
             throw new Error(`Project cannot exist without an author`)
@@ -23,7 +21,7 @@ class ProjectsService {
                 author_name
             ) VALUES ($1, $2, $3)
             RETURNING *`,
-            [name, optAuthorId, author.data.name]
+            [name, Number(authorId), author.data.name]
         );
 
         if (!data) {
@@ -33,7 +31,7 @@ class ProjectsService {
         return { data: data.rows[0] };
     }
 
-    async getAll(userId: number): Promise<{ data: IProject[] }> {
+    async getAll(): Promise<{ data: IProject[] }> {
         const client = await pool.connect();
         const data = await client.query<IProject>(
             `
@@ -46,9 +44,7 @@ class ProjectsService {
                 created_at,
                 updated_at
             FROM projects
-            WHERE author_id = $1
-            ORDER BY updated_at DESC`,
-            [userId]
+            ORDER BY updated_at DESC`
         );
 
         if (!data) {
@@ -58,7 +54,7 @@ class ProjectsService {
         return { data: data.rows };
     }
 
-    async getOne(id: number): Promise<{ data: IProject }> {
+    async getOne(id: string): Promise<{ data: IProject }> {
         const client = await pool.connect();
         const data = await client.query<IProject>(
             `

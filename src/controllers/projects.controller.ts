@@ -14,9 +14,7 @@ class ProjectsController {
                     .json({ message: "Current user ID are required" });
             }
 
-            const optUserId = Number(userId);
-
-            const data = await projectsService.create(name, optUserId);
+            const data = await projectsService.create(name, userId);
 
             res.status(201).json(data);
         } catch (e) {
@@ -25,19 +23,9 @@ class ProjectsController {
         }
     }
 
-    async getAll(req: IAuthRequest, res: Response) {
+    async getAll(_req: Request, res: Response) {
         try {
-            const userId = req.userId;
-
-            if (!userId) {
-                return res
-                    .status(400)
-                    .json({ message: "Current user ID are required" });
-            }
-
-            const optUserId = Number(userId);
-
-            const data = await projectsService.getAll(optUserId);
+            const data = await projectsService.getAll();
 
             res.status(200).json(data);
         } catch (e) {
@@ -50,7 +38,7 @@ class ProjectsController {
         try {
             const { id } = req.params;
 
-            const data = await projectsService.getOne(Number(id));
+            const data = await projectsService.getOne(id);
 
             res.status(200).json(data);
         } catch (e) {

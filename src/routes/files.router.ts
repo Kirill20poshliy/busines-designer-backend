@@ -1,6 +1,6 @@
-import express from 'express';
-import filesController from '../controllers/files.controller';
-import { uploadPhoto } from '../utils/files';
+import express from "express";
+import filesController from "../controllers/files.controller";
+import { uploadPhoto } from "../middleware/files.middleware";
 
 const filesRouter = express.Router();
 
@@ -38,7 +38,7 @@ const filesRouter = express.Router();
  *       500:
  *         description: Internal server error
  */
-filesRouter.post('/', uploadPhoto, filesController.upload);
+filesRouter.post("/", uploadPhoto, filesController.upload);
 
 /**
  * @swagger
@@ -63,7 +63,7 @@ filesRouter.post('/', uploadPhoto, filesController.upload);
  *       404:
  *         description: Bad request
  */
-filesRouter.get('/:id', filesController.getFile);
+filesRouter.get("/:id", filesController.getFile);
 
 /**
  * @swagger
@@ -84,6 +84,6 @@ filesRouter.get('/:id', filesController.getFile);
  *       404:
  *         description: Bad request
  */
-filesRouter.delete('/:id', filesController.deleteFile);
+filesRouter.delete("/:id", filesController.deleteFile);
 
 export { filesRouter };

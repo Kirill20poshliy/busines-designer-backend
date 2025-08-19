@@ -1,6 +1,6 @@
 import { Router } from "express";
 import documentsController from "../controllers/documents.controller";
-import { uploadPhoto } from "../utils/files";
+import { uploadPhoto } from "../middleware/files.middleware";
 
 const docsRouter = Router();
 
@@ -27,7 +27,7 @@ const docsRouter = Router();
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Document'
-*/
+ */
 docsRouter.get("/", documentsController.getAll);
 
 /**
@@ -239,7 +239,11 @@ docsRouter.patch("/:id/content", documentsController.updateContent);
  *       404:
  *         description: Bad request
  */
-docsRouter.patch("/:id/picture", uploadPhoto, documentsController.updatePicture);
+docsRouter.patch(
+    "/:id/picture",
+    uploadPhoto,
+    documentsController.updatePicture
+);
 
 /**
  * @swagger
@@ -262,4 +266,4 @@ docsRouter.patch("/:id/picture", uploadPhoto, documentsController.updatePicture)
  */
 docsRouter.delete("/:id", documentsController.delete);
 
-export { docsRouter }
+export { docsRouter };

@@ -6,7 +6,7 @@
  *       type: object
  *       properties:
  *         id:
- *           type: number
+ *           type: string
  *         token:
  *           type: string
  *         user_id:
@@ -18,9 +18,9 @@
  *         
  */
 export interface IToken {
-    id: number,
+    id: string,
     token: string,
-    user_id: number,
+    user_id: string,
     created_at: string,
     updated_at: string,
 }
