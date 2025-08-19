@@ -10,9 +10,7 @@ class FilesService {
         objectId: string,
         mimetype: string
     ): Promise<{ photoId: string; photoUrl: string }> {
-        const client = await pool.connect();
-
-        const data = await client.query<IFile>(
+        const data = await pool.query<IFile>(
             `
             INSERT INTO files (
                 object_type,
@@ -36,9 +34,7 @@ class FilesService {
     }
 
     async getFile(id: number): Promise<{url: string, mime_type: string}> {
-        const client = await pool.connect();
-
-        const data = await client.query<IFile>(
+        const data = await pool.query<IFile>(
             `
             SELECT 
                 url,
@@ -65,9 +61,7 @@ class FilesService {
     }
 
     async deleteFile(id: number, userId: number): Promise<void> {
-        const client = await pool.connect()
-
-        const check = await client.query<IFile>(`
+        const check = await pool.query<IFile>(`
             SELECT 
                 id,
                 url,
@@ -87,7 +81,7 @@ class FilesService {
 
         const url = check.rows[0].url;
 
-        await client.query(`
+        await pool.query(`
             DELETE FROM files WHERE id = $1`,
             [id]
         )

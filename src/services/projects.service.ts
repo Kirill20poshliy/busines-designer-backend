@@ -5,15 +5,13 @@ import userService from "./user.service";
 
 class ProjectsService {
     async create(name: string, authorId: string): Promise<{ data: IProject }> {
-        const client = await pool.connect();
-
         const author = await userService.getOne(authorId);
 
         if (author.data === null) {
             throw new Error(`Project cannot exist without an author`)
         }
 
-        const data = await client.query<IProject>(
+        const data = await pool.query<IProject>(
             `
             INSERT INTO projects (
                 name,
@@ -32,8 +30,7 @@ class ProjectsService {
     }
 
     async getAll(): Promise<{ data: IProject[] }> {
-        const client = await pool.connect();
-        const data = await client.query<IProject>(
+        const data = await pool.query<IProject>(
             `
             SELECT
                 id,
@@ -55,8 +52,7 @@ class ProjectsService {
     }
 
     async getOne(id: string): Promise<{ data: IProject }> {
-        const client = await pool.connect();
-        const data = await client.query<IProject>(
+        const data = await pool.query<IProject>(
             `
             SELECT
                 id,
@@ -84,8 +80,7 @@ class ProjectsService {
         name: string,
         authorId: string
     ): Promise<{ message: string }> {
-        const client = await pool.connect();
-        const data = await client.query(
+        const data = await pool.query(
             `
             UPDATE projects
             SET 
@@ -122,9 +117,7 @@ class ProjectsService {
             throw new Error(`Unable to upload file.`);
         }
 
-        const client = await pool.connect();
-
-        const data = await client.query(
+        const data = await pool.query(
             `
             UPDATE projects
             SET 
@@ -144,9 +137,7 @@ class ProjectsService {
     }
 
     async deletePicture(projectId: string, authorId: string): Promise<{message: string}> {
-        const client = await pool.connect();
-
-        const deletable = await client.query(`
+        const deletable = await pool.query(`
             UPDATE projects
             SET 
                 pict_url = null,
@@ -165,8 +156,7 @@ class ProjectsService {
     }
 
     async delete(id: number, authorId: number) {
-        const client = await pool.connect();
-        const data = await client.query(
+        const data = await pool.query(
             `
             DELETE 
             FROM projects 
@@ -188,9 +178,7 @@ class ProjectsService {
         pictUrl: string,
         userId: string
     ): Promise<{ message: string }> {
-        const client = await pool.connect();
-
-        const data = await client.query(`
+        const data = await pool.query(`
             UPDATE projects
             SET
                 name = $1,

@@ -28,8 +28,7 @@ class TokensService {
     }
 
     async findToken(refreshToken: string): Promise<IToken> {
-        const client = await pool.connect();
-        const token = await client.query<IToken>(
+        const token = await pool.query<IToken>(
             `
             SELECT *
             FROM tokens
@@ -49,8 +48,7 @@ class TokensService {
         userId: string,
         refreshToken: string
     ): Promise<{ token: string }> {
-        const client = await pool.connect();
-        const isExist = await client.query<IToken>(
+        const isExist = await pool.query<IToken>(
             `
             SELECT *
             FROM tokens
@@ -59,7 +57,7 @@ class TokensService {
         );
 
         if (isExist.rows.length !== 0) {
-            const newToken = await client.query<IToken>(
+            const newToken = await pool.query<IToken>(
                 `
                 UPDATE tokens
                 SET token = $1
@@ -73,7 +71,7 @@ class TokensService {
 
             return newToken.rows[0];
         } else {
-            const newToken = await client.query<IToken>(
+            const newToken = await pool.query<IToken>(
                 `
                 INSERT INTO tokens (
                     token,
@@ -94,8 +92,7 @@ class TokensService {
     }
 
     async removeToken(refreshToken: string): Promise<{ message: string }> {
-        const client = await pool.connect();
-        const remove = await client.query<IToken>(
+        const remove = await pool.query<IToken>(
             `
             DELETE 
             FROM tokens 

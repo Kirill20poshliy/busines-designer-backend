@@ -10,8 +10,7 @@ class UserService {
         firstname?: string,
         lastname?: string
     ): Promise<IUserInfo> {
-        const client = await pool.connect();
-        const data = await client.query<IUserInfo>(
+        const data = await pool.query<IUserInfo>(
             `
             INSERT INTO users (
                 email, 
@@ -38,8 +37,7 @@ class UserService {
     }
 
     async getAll(): Promise<{ data: IUserInfo[] }> {
-        const client = await pool.connect();
-        const data = await client.query<IUserInfo>(`
+        const data = await pool.query<IUserInfo>(`
             SELECT 
                 id,
                 email,
@@ -58,8 +56,7 @@ class UserService {
     }
 
     async getOne(id: string): Promise<{ data: IUserInfo }> {
-        const client = await pool.connect();
-        const data = await client.query<IUserInfo>(
+        const data = await pool.query<IUserInfo>(
             `
             SELECT
                 id,
@@ -83,8 +80,7 @@ class UserService {
     }
 
     async getOneByEmail(email: string): Promise<{ data: IUser }> {
-        const client = await pool.connect();
-        const data = await client.query<IUser>(
+        const data = await pool.query<IUser>(
             `
             SELECT
                 id,
@@ -111,8 +107,7 @@ class UserService {
         if (!body.email) {
             throw new Error("Email не задан.");
         }
-        const client = await pool.connect();
-        const data = await client.query(
+        const data = await pool.query(
             `
             UPDATE users
             SET 
@@ -137,9 +132,7 @@ class UserService {
             throw new Error("Password are required!.");
         }
 
-        const client = await pool.connect();
-
-        const user = await client.query<{ password: string }>(
+        const user = await pool.query<{ password: string }>(
             `
             SELECT password
             FROM user
@@ -163,7 +156,7 @@ class UserService {
 
         const hashPass = await bcrypt.hash(body.password, 3);
 
-        const data = await client.query(
+        const data = await pool.query(
             `
             UPDATE users
             SET 
@@ -184,15 +177,13 @@ class UserService {
         id: string,
         firstname: string
     ): Promise<{ message: string }> {
-        const client = await pool.connect();
-
         const user = await this.getOne(id);
 
         if (!user) {
             throw new Error(`User with id: "${id}" doesn't exists.`);
         }
 
-        const data = await client.query(
+        const data = await pool.query(
             `
             UPDATE users
             SET 
@@ -214,15 +205,13 @@ class UserService {
         id: string,
         lastname: string
     ): Promise<{ message: string }> {
-        const client = await pool.connect();
-
         const user = await this.getOne(id);
 
         if (!user) {
             throw new Error(`User with id: "${id}" doesn't exists.`);
         }
 
-        const data = await client.query(
+        const data = await pool.query(
             `
             UPDATE users
             SET 
@@ -257,9 +246,7 @@ class UserService {
             throw new Error(`Unable to upload file.`);
         }
 
-        const client = await pool.connect();
-
-        const data = await client.query(
+        const data = await pool.query(
             `
             UPDATE users
             SET 
@@ -277,9 +264,7 @@ class UserService {
     }
 
     async deleteAvatar(userId: string): Promise<{ message: string }> {
-        const client = await pool.connect();
-
-        const data = await client.query(
+        const data = await pool.query(
             `
             UPDATE users
             SET 
@@ -297,8 +282,7 @@ class UserService {
     }
 
     async delete(id: number): Promise<{ message: string }> {
-        const client = await pool.connect();
-        const data = await client.query(
+        const data = await pool.query(
             `
             DELETE 
             FROM users 
@@ -319,15 +303,13 @@ class UserService {
         lastname: string,
         email: string
     ): Promise<{ message: string }> {
-        const client = await pool.connect();
-
         const user = await this.getOne(userId);
 
         if (!user) {
             throw new Error(`User with id: "${userId}" doesn't exists.`);
         }
 
-        const data = await client.query(
+        const data = await pool.query(
             `
             UPDATE users
             SET 
