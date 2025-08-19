@@ -27,11 +27,18 @@ class UserController {
         }
     }
 
-    async updateEmail(req: Request, res: Response) {
+    async updateEmail(req: IAuthRequest, res: Response) {
         try {
-            const { id } = req.params;
+            const userId = req.userId;
+
+            if (!userId) {
+                return res
+                    .status(403)
+                    .json({ message: "Current user ID are required" });
+            }
+
             const body = req.body as {email: string};
-            const data = await userService.updateEmail(Number(id), body);
+            const data = await userService.updateEmail(userId, body);
 
             res.status(201).json(data);
         } catch (e) {
@@ -40,11 +47,18 @@ class UserController {
         }
     }
 
-    async updatePassword(req: Request, res: Response) {
+    async updatePassword(req: IAuthRequest, res: Response) {
         try {
-            const { id } = req.params;
+            const userId = req.userId;
+
+            if (!userId) {
+                return res
+                    .status(403)
+                    .json({ message: "Current user ID are required" });
+            }
+
             const body = req.body;
-            const data = await userService.updatePassword(Number(id), body);
+            const data = await userService.updatePassword(userId, body);
 
             res.status(201).json(data)
         } catch (e) {
@@ -53,29 +67,43 @@ class UserController {
         }
     }
 
-    async updateFirstname(req: Request, res: Response) {
+    async updateFirstname(req: IAuthRequest, res: Response) {
         try {
-            const { id } = req.params;
+            const userId = req.userId;
+
+            if (!userId) {
+                return res
+                    .status(403)
+                    .json({ message: "Current user ID are required" });
+            }
+
             const { firstname } = req.body;
-            const data = await userService.updateFirstname(id, firstname);
+            const data = await userService.updateFirstname(userId, firstname);
 
             res.status(201).json(data)
         } catch (e) {
             console.log(e)
-            res.status(500).json({ message: `Error updating user password -> ${e}` });
+            res.status(500).json({ message: `Error updating user firstname -> ${e}` });
         }
     }
 
-    async updateLastname(req: Request, res: Response) {
+    async updateLastname(req: IAuthRequest, res: Response) {
         try {
-            const { id } = req.params;
+            const userId = req.userId;
+
+            if (!userId) {
+                return res
+                    .status(403)
+                    .json({ message: "Current user ID are required" });
+            }
+            
             const { lastname } = req.body;
-            const data = await userService.updateLastname(id, lastname);
+            const data = await userService.updateLastname(userId, lastname);
 
             res.status(201).json(data)
         } catch (e) {
             console.log(e)
-            res.status(500).json({ message: `Error updating user password -> ${e}` });
+            res.status(500).json({ message: `Error updating user lastname -> ${e}` });
         }
     }
 
@@ -89,20 +117,58 @@ class UserController {
 
             if (!userId) {
                 return res
-                    .status(400)
+                    .status(403)
                     .json({ message: "Current user ID are required" });
             }
 
-            const optUserId = Number(userId);
             const filePath = req.file.path;
             const mimetype = req.file.mimetype;
 
-            const data = await userService.updateAvatar(optUserId, filePath, mimetype);
+            const data = await userService.updateAvatar(userId, filePath, mimetype);
 
             res.status(201).json(data);
         } catch (e) {
             console.log(e)
             res.status(500).json({ message: `Error updating user avatar -> ${e}` });
+        }
+    }
+
+    async deleteAvatar(req: IAuthRequest, res: Response) {
+        try {
+            const userId = req.userId;
+
+            if (!userId) {
+                return res
+                    .status(403)
+                    .json({ message: "Current user ID are required" });
+            }
+
+            const data = await userService.deleteAvatar(userId);
+
+            res.status(200).json(data);
+        } catch (e) {
+            console.log(e)
+            res.status(500).json({ message: `Error deleting user avatar -> ${e}` });
+        }
+    }
+
+    async updateProfile(req: IAuthRequest, res: Response) {
+        try {
+            const userId = req.userId;
+
+            if (!userId) {
+                return res
+                    .status(403)
+                    .json({ message: "Current user ID are required" });
+            }
+            
+            const { firstname, lastname, email } = req.body;
+            const data = await userService.updateProfile(userId, firstname, lastname, email);
+
+            res.status(201).json(data)
+        } catch (e) {
+            console.log(e)
+            res.status(500).json({ message: `Error updating user profile -> ${e}` });
         }
     }
 }

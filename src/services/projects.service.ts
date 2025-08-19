@@ -80,21 +80,24 @@ class ProjectsService {
     }
 
     async updateName(
-        id: number,
+        id: string,
         name: string,
-        authorId: number
+        authorId: string
     ): Promise<{ message: string }> {
         const client = await pool.connect();
         const data = await client.query(
             `
             UPDATE projects
-            SET name = $1, updated_at = NOW()
+            SET 
+                name = $1, 
+                updated_at = NOW()
             WHERE id = $2
-                AND author_id = $3;`,
+                AND author_id = $3;
+            RETURNING *`,
             [name, id, authorId]
         );
 
-        if (!data) {
+        if (!data.rows.length) {
             throw new Error(`Error while project "${id}" name updating.`);
         }
 
@@ -102,8 +105,8 @@ class ProjectsService {
     }
 
     async updatePicture(
-        userId: number,
-        objectId: number,
+        userId: string,
+        objectId: string,
         filePath: string,
         mimetype: string
     ): Promise<{ message: string }> {
@@ -124,7 +127,9 @@ class ProjectsService {
         const data = client.query(
             `
             UPDATE projects
-            SET pict_url = $1
+            SET 
+                pict_url = $1, 
+                updated_at = NOW()
             WHERE id = $2`,
             [fileData.photoUrl, objectId]
         );
@@ -136,6 +141,27 @@ class ProjectsService {
         }
 
         return { message: "success" };
+    }
+
+    async deletePicture(projectId: string, authorId: string): Promise<{message: string}> {
+        const client = await pool.connect();
+
+        const deletable = await client.query(`
+            UPDATE projects
+            SET 
+                pict_url = null,
+                updated_at = NOW()
+            WHERE id = $1 
+                AND author_id = $2
+            RETURNING *`,
+            [projectId, authorId]
+        )
+
+        if (!deletable.rows.length) {
+            throw new Error(`Error while deleting project "${projectId}" picture`)
+        }
+
+        return { message: 'success' }
     }
 
     async delete(id: number, authorId: number) {
@@ -154,6 +180,33 @@ class ProjectsService {
         }
 
         return { message: "success" };
+    }
+
+    async updateData(
+        id: string,
+        name: string,
+        pictUrl: string,
+        userId: string
+    ): Promise<{ message: string }> {
+        const client = await pool.connect();
+
+        const data = await client.query(`
+            UPDATE projects
+            SET
+                name = $1,
+                pict_url = $2,
+                updated_at = NOW()
+            WHERE id = $3
+                AND author_id = $4
+            RETURNING *`,
+            [name, pictUrl, id, userId]
+        )
+
+        if (!data.rows.length) {
+            throw new Error(`Error while updateing project "${id}" data`)
+        }
+
+        return { message: 'success' }
     }
 }
 

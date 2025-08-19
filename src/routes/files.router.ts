@@ -16,20 +16,26 @@ const filesRouter = express.Router();
  *   post:
  *     summary: Загрузить файл
  *     tags: [Files]
+ *     parameters:
+ *       - in: query
+ *         name: object_type
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: object_id
+ *         schema:
+ *           type: string
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
- *             required:
- *               - objectType
- *               - objectId
  *             properties:
- *               objectType:
+ *               photo:
  *                 type: string
- *               objectId:
- *                 type: number
+ *                 format: binary
+ *                 description: Файл изображения (JPEG, PNG)
  *     responses:
  *       201:
  *         description: File uploaded successfully

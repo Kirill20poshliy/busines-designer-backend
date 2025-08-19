@@ -166,6 +166,76 @@ projectsRouter.patch(
 
 /**
  * @swagger
+ * /api/projects/{id}/picture:
+ *   delete:
+ *     summary: Удалить изображение проекта
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID проекта
+ *     responses:
+ *       200:
+ *         description: Project data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+projectsRouter.patch("/:id/picture", projectsController.deletePicture);
+
+/**
+ * @swagger
+ * /api/projects/{id}/data:
+ *   patch:
+ *     summary: Изменить данные проекта
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID проекта
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - pictUrl
+ *             properties:
+ *               name:
+ *                 type: string
+ *               pictUrl:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Project data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+projectsRouter.patch("/:id/data", projectsController.updateData);
+
+/**
+ * @swagger
  * /api/projects/{id}:
  *   delete:
  *     summary: Удалить проект

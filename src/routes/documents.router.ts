@@ -15,10 +15,15 @@ const docsRouter = Router();
  * @swagger
  * /api/documents:
  *   get:
- *     summary: Получить список всех документов
+ *     summary: Получить список документов проекта
  *     tags: [Documents]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: project_id
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         content:
@@ -244,6 +249,34 @@ docsRouter.patch(
     uploadPhoto,
     documentsController.updatePicture
 );
+
+/**
+ * @swagger
+ * /api/documents/{id}/picture:
+ *   delete:
+ *     summary: Удалить изображение документа
+ *     tags: [Documents]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID документа
+ *     responses:
+ *       200:
+ *         description: Document data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+docsRouter.delete("/:id/picture", documentsController.deletePicture);
 
 /**
  * @swagger
