@@ -30,7 +30,7 @@ class UserService {
             ]
         );
 
-        if (!data) {
+        if (!data.rows.length) {
             throw new Error("Error while creating user.");
         }
 
@@ -105,7 +105,7 @@ class UserService {
     }
 
     async updateEmail(
-        id: number,
+        id: string,
         body: { email: string }
     ): Promise<{ message: string }> {
         if (!body.email) {
@@ -115,7 +115,9 @@ class UserService {
         const data = await client.query(
             `
             UPDATE users
-            SET email = $1, updated_at = NOW()
+            SET 
+                email = $1, 
+                updated_at = NOW()
             WHERE id = $2;`,
             [body.email, id]
         );
@@ -128,20 +130,45 @@ class UserService {
     }
 
     async updatePassword(
-        id: number,
-        body: { password: string }
+        id: string,
+        body: { password: string; newPassword: string }
     ): Promise<{ message: string }> {
         if (!body.password) {
             throw new Error("Password are required!.");
         }
 
+        const client = await pool.connect();
+
+        const user = await client.query<{ password: string }>(
+            `
+            SELECT password
+            FROM user
+            WHERE id = $1
+            LIMIT 1`,
+            [id]
+        );
+
+        if (!user.rows.length) {
+            throw new Error(`User with id "${id}" not found`);
+        }
+
+        const verifyPass = await bcrypt.compare(
+            body.password,
+            user.rows[0].password
+        );
+
+        if (!verifyPass) {
+            throw new Error(`Invalid password`);
+        }
+
         const hashPass = await bcrypt.hash(body.password, 3);
 
-        const client = await pool.connect();
         const data = await client.query(
             `
             UPDATE users
-            SET password = $1, updated_at = NOW()
+            SET 
+                password = $1, 
+                updated_at = NOW()
             WHERE id = $2;`,
             [hashPass, id]
         );
@@ -168,7 +195,10 @@ class UserService {
         const data = await client.query(
             `
             UPDATE users
-            SET firstname = $1, name = $2, updated_at = NOW()
+            SET 
+                firstname = $1, 
+                name = $2, 
+                updated_at = NOW()
             WHERE id = $3;`,
             [firstname, [user.data.lastname, firstname].join(" "), id]
         );
@@ -195,7 +225,10 @@ class UserService {
         const data = await client.query(
             `
             UPDATE users
-            SET lastname = $1, name = $2, updated_at = NOW()
+            SET 
+                lastname = $1, 
+                name = $2, 
+                updated_at = NOW()
             WHERE id = $3;`,
             [lastname, [lastname, user.data.firstname].join(" "), id]
         );
@@ -208,7 +241,7 @@ class UserService {
     }
 
     async updateAvatar(
-        userId: number,
+        userId: string,
         filePath: string,
         mimetype: string
     ): Promise<{ message: string }> {
@@ -229,13 +262,35 @@ class UserService {
         const data = client.query(
             `
             UPDATE users
-            SET pict_url = $1
+            SET 
+                pict_url = $1,
+                updated_at = NOW()
             WHERE id = $2`,
             [fileData.photoUrl, userId]
         );
 
         if (!data) {
             throw new Error(`Error while user "${userId}" avatar updating.`);
+        }
+
+        return { message: "success" };
+    }
+
+    async deleteAvatar(userId: string): Promise<{ message: string }> {
+        const client = await pool.connect();
+
+        const data = await client.query(
+            `
+            UPDATE users
+            SET 
+                pict_url = null,
+                updated_at = NOW()
+            WHERE id = $1`,
+            [userId]
+        );
+
+        if (!data) {
+            throw new Error(`Error while deleting user avatar`);
         }
 
         return { message: "success" };
@@ -253,6 +308,46 @@ class UserService {
 
         if (!data) {
             throw new Error(`Error while user "${id}" deleteing.`);
+        }
+
+        return { message: "success" };
+    }
+
+    async updateProfile(
+        userId: string,
+        firstname: string,
+        lastname: string,
+        email: string
+    ): Promise<{ message: string }> {
+        const client = await pool.connect();
+
+        const user = await this.getOne(userId);
+
+        if (!user) {
+            throw new Error(`User with id: "${userId}" doesn't exists.`);
+        }
+
+        const data = await client.query(
+            `
+            UPDATE users
+            SET 
+                firstname = $1,
+                lastname = $2,
+                name = $3, 
+                email = $4,
+                updated_at = NOW()
+            WHERE id = $5;`,
+            [
+                firstname,
+                lastname,
+                [lastname, firstname].join(" "),
+                email,
+                userId,
+            ]
+        );
+
+        if (!data) {
+            throw new Error(`Error while user "${userId}" profile updating.`);
         }
 
         return { message: "success" };

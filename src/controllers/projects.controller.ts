@@ -10,7 +10,7 @@ class ProjectsController {
 
             if (!userId) {
                 return res
-                    .status(400)
+                    .status(403)
                     .json({ message: "Current user ID are required" });
             }
 
@@ -38,6 +38,12 @@ class ProjectsController {
         try {
             const { id } = req.params;
 
+            if (!id) {
+                return res
+                    .status(400)
+                    .json({ message: "Bad request" });
+            }
+
             const data = await projectsService.getOne(id);
 
             res.status(200).json(data);
@@ -49,15 +55,28 @@ class ProjectsController {
 
     async updateName(req: IAuthRequest, res: Response) {
         try {
-            const { id } = req.params;
-            const { name } = req.body as { name: string };
             const userId = req.userId;
-            const optUserId = Number(userId);
+            
+            if (!userId) {
+                return res
+                    .status(403)
+                    .json({ message: "Current user ID are required" });
+            }
+            
+            const { id } = req.params;
+            
+            if (!id) {
+                return res
+                    .status(400)
+                    .json({ message: "Bad request" });
+            }
+            
+            const { name } = req.body as { name: string };
 
             const data = await projectsService.updateName(
-                Number(id),
+                id,
                 name,
-                optUserId
+                userId
             );
 
             res.status(200).json(data);
@@ -77,23 +96,55 @@ class ProjectsController {
 
             if (!userId) {
                 return res
-                    .status(400)
+                    .status(403)
                     .json({ message: "Current user ID are required" });
             }
 
-
             const { id } = req.params;
-            const optUserId = Number(userId);
+
+            if (!id) {
+                return res
+                    .status(400)
+                    .json({ message: "Bad request" });
+            }
+
             const filePath = req.file.path;
             const mimetype = req.file.mimetype;
 
-            const data = await projectsService.updatePicture(optUserId, Number(id), filePath, mimetype);
+            const data = await projectsService.updatePicture(userId, id, filePath, mimetype);
 
             res.status(201).json(data);
         } catch (e) {
             console.log(e)
             res.status(500).json({ message: `Error updating project picture -> ${e}` });
-                }
+        }
+    }
+
+    async deletePicture(req: IAuthRequest, res: Response) {
+        try {
+            const userId = req.userId;
+
+            if (!userId) {
+                return res
+                    .status(403)
+                    .json({ message: "Current user ID are required" });
+            }
+
+            const { id } = req.params;
+
+            if (!id) {
+                return res
+                    .status(400)
+                    .json({ message: "Bad request" });
+            }
+
+            const data = await projectsService.deletePicture(id, userId);
+
+            res.status(200).json(data);
+        } catch (e) {
+            console.log(e)
+            res.status(500).json({ message: `Error updating project picture -> ${e}` });
+        }
     }
 
     async delete(req: IAuthRequest, res: Response) {
@@ -109,6 +160,42 @@ class ProjectsController {
             console.log(e);
             res.status(500).json({
                 message: `Error deleteing project -> ${e}`,
+            });
+        }
+    }
+
+    async updateData(req: IAuthRequest, res: Response) {
+        try {
+            const userId = req.userId;
+            
+            if (!userId) {
+                return res
+                    .status(403)
+                    .json({ message: "Current user ID are required" });
+            }
+            
+            const { id } = req.params;
+            
+            if (!id) {
+                return res
+                    .status(400)
+                    .json({ message: "Bad request" });
+            }
+            
+            const { name, pictUrl } = req.body as { name: string, pictUrl: string };
+
+            const data = await projectsService.updateData(
+                id,
+                name,
+                pictUrl,
+                userId
+            );
+
+            res.status(200).json(data);
+        } catch (e) {
+            console.log(e);
+            res.status(500).json({
+                message: `Error updating project data -> ${e}`,
             });
         }
     }

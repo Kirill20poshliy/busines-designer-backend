@@ -27,7 +27,6 @@ class DocumentsController {
 
     async getAll(req: Request, res: Response) {
         try {
-            // const userId = req.userId;
             const { project_id } = req.query as { project_id: string };
             if (!project_id) {
                 return res
@@ -50,7 +49,7 @@ class DocumentsController {
         try {
             const { id } = req.params;
 
-            const data = await documentsService.getOne(Number(id));
+            const data = await documentsService.getOne(id);
 
             res.status(200).json(data);
         } catch (e) {
@@ -64,12 +63,17 @@ class DocumentsController {
             const { id } = req.params;
             const { name } = req.body as { name: string };
             const userId = req.userId;
-            const optUserId = Number(userId);
+
+            if (!userId) {
+                return res
+                    .status(403)
+                    .json({ message: "Current user ID are required" });
+            }
 
             const data = await documentsService.updateName(
-                Number(id),
+                id,
                 name,
-                optUserId
+                userId
             );
 
             res.status(200).json(data);
@@ -81,17 +85,14 @@ class DocumentsController {
         }
     }
 
-    async updateContent(req: IAuthRequest, res: Response) {
+    async updateContent(req: Request, res: Response) {
         try {
             const { id } = req.params;
             const { content } = req.body as { content: string };
-            const userId = req.userId;
-            const optUserId = Number(userId);
 
             const data = await documentsService.updateContent(
-                Number(id),
+                id,
                 content,
-                optUserId
             );
 
             res.status(200).json(data);
@@ -106,14 +107,19 @@ class DocumentsController {
     async updateProject(req: IAuthRequest, res: Response) {
         try {
             const { id } = req.params;
-            const { projectId } = req.body as { projectId: number };
+            const { projectId } = req.body as { projectId: string };
             const userId = req.userId;
-            const optUserId = Number(userId);
+
+            if (!userId) {
+                return res
+                    .status(403)
+                    .json({ message: "Current user ID are required" });
+            }
 
             const data = await documentsService.updateProject(
-                Number(id),
-                Number(projectId),
-                optUserId
+                id,
+                projectId,
+                userId
             );
 
             res.status(200).json(data);
@@ -141,26 +147,57 @@ class DocumentsController {
 
 
             const { id } = req.params;
-            const optUserId = Number(userId);
             const filePath = req.file.path;
             const mimetype = req.file.mimetype;
 
-            const data = await documentsService.updatePicture(optUserId, Number(id), filePath, mimetype);
+            const data = await documentsService.updatePicture(userId, id, filePath, mimetype);
 
             res.status(201).json(data);
         } catch (e) {
             console.log(e)
             res.status(500).json({ message: `Error updating document picture -> ${e}` });
-                }
+        }
+    }
+
+    async deletePicture(req: IAuthRequest, res: Response) {
+        try {
+            const userId = req.userId;
+
+            if (!userId) {
+                return res
+                    .status(403)
+                    .json({ message: "Current user ID are required" });
+            }
+
+            const { id } = req.params;
+
+            if (!id) {
+                return res
+                    .status(400)
+                    .json({ message: "Bad request" });
+            }
+
+            const data = await documentsService.deletePicture(id, userId);
+
+            res.status(200).json(data);
+        } catch (e) {
+            console.log(e)
+            res.status(500).json({ message: `Error deleting document picture -> ${e}` });
+        }
     }
 
     async delete(req: IAuthRequest, res: Response) {
         try {
             const { id } = req.params;
             const userId = req.userId;
-            const optUserId = Number(userId);
 
-            const data = await documentsService.delete(Number(id), optUserId);
+            if (!userId) {
+                return res
+                    .status(403)
+                    .json({ message: "Current user ID are required" });
+            }
+
+            const data = await documentsService.delete(id, userId);
 
             res.status(200).json(data);
         } catch (e) {

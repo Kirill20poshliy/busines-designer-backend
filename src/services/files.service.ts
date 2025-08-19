@@ -4,10 +4,10 @@ import fs from "fs";
 
 class FilesService {
     async upload(
-        authorId: number,
+        authorId: string,
         filePath: string,
         objectType: "user" | "project" | "document",
-        objectId: number,
+        objectId: string,
         mimetype: string
     ): Promise<{ photoId: string; photoUrl: string }> {
         const client = await pool.connect();
@@ -22,7 +22,7 @@ class FilesService {
                 mime_type
             ) VALUES ($1, $2, $3, $4, $5)
             RETURNING *`,
-            [objectType, filePath, objectId, authorId, mimetype]
+            [objectType, filePath, objectId ?? null, authorId, mimetype]
         );
 
         if (!data) {

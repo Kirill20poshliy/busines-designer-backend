@@ -18,20 +18,19 @@ class FilesController {
                     .json({ message: "Current user ID are required" });
             }
 
-            const optUserId = Number(userId);
             const filePath = req.file.path;
             const mimetype = req.file.mimetype;
-            const objectType = req.body.objectType;
-            const objectId = req.body.objectId;
+            const objectType = req.query.object_type as "user" | "project" | "document";
+            const objectId = req.query.object_id as string;
 
-            if (!objectType || !objectId) {
+            if (!objectType) {
                 return res
                     .status(400)
                     .json({ error: "File must be linked to the object!" });
             }
 
             const data = await filesService.upload(
-                optUserId,
+                userId,
                 filePath,
                 objectType,
                 objectId,

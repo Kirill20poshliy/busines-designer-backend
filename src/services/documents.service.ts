@@ -5,22 +5,27 @@ import projectsService from "./projects.service";
 import userService from "./user.service";
 
 class DocumentsService {
-    async create(name: string, authorId: string, projectId: string): Promise<{data: IDocument}> {
+    async create(
+        name: string,
+        authorId: string,
+        projectId: string
+    ): Promise<{ data: IDocument }> {
         const client = await pool.connect();
 
         const author = await userService.getOne(authorId);
 
         if (author.data === null) {
-            throw new Error(`Project cannot exist without an author`)
+            throw new Error(`Project cannot exist without an author`);
         }
 
         const project = await projectsService.getOne(projectId);
 
         if (project.data === null) {
-            throw new Error('The specified project does not exist.')
+            throw new Error("The specified project does not exist.");
         }
 
-        const data = await client.query<IDocument>(`
+        const data = await client.query<IDocument>(
+            `
             INSERT INTO documents (
                 name,
                 author_id,
@@ -29,19 +34,22 @@ class DocumentsService {
                 project_name
             ) VALUES ($1, $2, $3, $4, $5)
             RETURNING *`,
-            [name, Number(authorId), author.data.name, projectId, project.data.name]
-        )
+            [name, authorId, author.data.name, projectId, project.data.name]
+        );
 
-        if (!data) {
-            throw new Error('Error while creating document.')
+        if (!data.rows.length) {
+            throw new Error("Error while creating document.");
         }
 
-        return {data: data.rows[0]}
+        return { data: data.rows[0] };
     }
 
-    async getAll(projectId: string): Promise<{data: Omit<IDocument, 'content'>[]}> {
-        const client = await pool.connect()
-        const data = await client.query<Omit<IDocument, 'content'>>(`
+    async getAll(
+        projectId: string
+    ): Promise<{ data: Omit<IDocument, "content">[] }> {
+        const client = await pool.connect();
+        const data = await client.query<Omit<IDocument, "content">>(
+            `
             SELECT
                 id,
                 name,
@@ -55,19 +63,20 @@ class DocumentsService {
             FROM documents
             WHERE project_id = $1
             ORDER BY updated_at DESC`,
-            [Number(projectId)]
-        )
+            [projectId]
+        );
 
         if (!data) {
-            throw new Error('Error while getting documents.')
+            throw new Error("Error while getting documents.");
         }
 
-        return {data: data.rows}
+        return { data: data.rows };
     }
 
-    async getOne(id: number): Promise<{data: IDocument}> {
-        const client = await pool.connect()
-        const data = await client.query<IDocument>(`
+    async getOne(id: string): Promise<{ data: IDocument }> {
+        const client = await pool.connect();
+        const data = await client.query<IDocument>(
+            `
             SELECT
                 id,
                 name,
@@ -82,17 +91,21 @@ class DocumentsService {
             WHERE id = $1
             LIMIT 1`,
             [id]
-        )
+        );
 
         if (!data) {
-            throw new Error(`Error while getting document "${id}".`)
+            throw new Error(`Error while getting document "${id}".`);
         }
 
-        return {data: data.rows[0] || null}
+        return { data: data.rows[0] || null };
     }
 
-    async updateName(id: number, name: string, authorId: number): Promise<{message: string}> {
-        const client = await pool.connect()
+    async updateName(
+        id: string,
+        name: string,
+        authorId: string
+    ): Promise<{ message: string }> {
+        const client = await pool.connect();
         const data = await client.query(
             `
             UPDATE documents
@@ -100,19 +113,24 @@ class DocumentsService {
                 name = $1, 
                 updated_at = NOW()
             WHERE id = $2
-                AND author_id = $3;`,
+                AND author_id = $3;
+            RETURNING *`,
             [name, id, authorId]
         );
 
-        if (!data) {
+        if (!data.rows.length) {
             throw new Error(`Error while document "${id}" name updating.`);
         }
 
-        return {message: 'success'}
+        return { message: "success" };
     }
 
-    async updateProject(id: number, projectId: number, authorId: number): Promise<{message: string}> {
-        const client = await pool.connect()
+    async updateProject(
+        id: string,
+        projectId: string,
+        authorId: string
+    ): Promise<{ message: string }> {
+        const client = await pool.connect();
         const data = await client.query(
             `
             UPDATE documents
@@ -120,38 +138,44 @@ class DocumentsService {
                 project_id = $1, 
                 updated_at = NOW()
             WHERE id = $2
-                AND author_id = $3;`,
+                AND author_id = $3;
+            RETURNING *`,
             [projectId, id, authorId]
         );
 
-        if (!data) {
+        if (!data.rows.length) {
             throw new Error(`Error while document "${id}" project updating.`);
         }
 
-        return {message: 'success'}
+        return { message: "success" };
     }
 
-    async updateContent(id: number, content: string, authorId: number): Promise<{message: string}> {
-        const client = await pool.connect()
+    async updateContent(
+        id: string,
+        content: string
+    ): Promise<{ message: string }> {
+        const client = await pool.connect();
         const data = await client.query(
             `
             UPDATE documents
-            SET content = $1, updated_at = NOW()
+            SET 
+                content = $1, 
+                updated_at = NOW()
             WHERE id = $2
-                AND author_id = $3;`,
-            [content, id, authorId]
+            RETURNING *`,
+            [content, id]
         );
 
-        if (!data) {
+        if (!data.rows.length) {
             throw new Error(`Error while document "${id}" content updating.`);
         }
 
-        return {message: 'success'}
+        return { message: "success" };
     }
 
     async updatePicture(
-        userId: number,
-        objectId: number,
+        userId: string,
+        objectId: string,
         filePath: string,
         mimetype: string
     ): Promise<{ message: string }> {
@@ -169,15 +193,19 @@ class DocumentsService {
 
         const client = await pool.connect();
 
-        const data = client.query(
+        const data = await client.query(
             `
             UPDATE documents
-            SET pict_url = $1
-            WHERE id = $2`,
-            [fileData.photoUrl, objectId]
+            SET 
+                pict_url = $1,
+                updated_at = NOW()
+            WHERE id = $2
+                AND author_id = $3
+            RETURNING *`,
+            [fileData.photoUrl, objectId, userId]
         );
 
-        if (!data) {
+        if (!data.rows.length) {
             throw new Error(
                 `Error while document "${objectId}" picture updating.`
             );
@@ -186,22 +214,45 @@ class DocumentsService {
         return { message: "success" };
     }
 
-    async delete(id: number, authorId: number) {
+    async deletePicture(documentId: string, authorId: string) {
         const client = await pool.connect();
-        const data = await client.query(`
+
+        const deletable = await client.query(`
+            UPDATE documents
+            SET 
+                pict_url = null,
+                updated_at = NOW()
+            WHERE id = $1 
+                AND author_id = $2
+            RETURNING *`,
+            [documentId, authorId]
+        )
+
+        if (!deletable.rows.length) {
+            throw new Error(`Error while deleting project "${documentId}" picture`)
+        }
+
+        return { message: 'success' }
+    }
+
+    async delete(id: string, authorId: string) {
+        const client = await pool.connect();
+        const data = await client.query(
+            `
             DELETE 
             FROM documents 
             WHERE id = $1
-                AND author_id = $2`,
+                AND author_id = $2
+            RETURNING *`,
             [id, authorId]
-        )
+        );
 
-        if (!data) {
-            throw new Error(`Error while document "${id}" deleteing.`)
+        if (!data.rows.length) {
+            throw new Error(`Error while document "${id}" deleteing.`);
         }
 
         return { message: "success" };
     }
 }
 
-export default new DocumentsService()
+export default new DocumentsService();

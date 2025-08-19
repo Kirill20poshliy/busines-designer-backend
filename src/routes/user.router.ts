@@ -58,17 +58,10 @@ usersRouter.get("/:id", userController.getOne);
 
 /**
  * @swagger
- * /api/users/{id}/email:
+ * /api/users/email:
  *   patch:
  *     summary: Изменить email пользователя
  *     tags: [Users]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: ID пользователя
  *     requestBody:
  *       required: true
  *       content:
@@ -95,21 +88,14 @@ usersRouter.get("/:id", userController.getOne);
  *       404:
  *         description: Bad request
  */
-usersRouter.patch("/:id/email", userController.updateEmail);
+usersRouter.patch("/email", userController.updateEmail);
 
 /**
  * @swagger
- * /api/users/{id}/password:
+ * /api/users/password:
  *   patch:
  *     summary: Изменить password пользователя
  *     tags: [Users]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: ID пользователя
  *     requestBody:
  *       required: true
  *       content:
@@ -117,12 +103,13 @@ usersRouter.patch("/:id/email", userController.updateEmail);
  *           schema:
  *             type: object
  *             required:
- *               - email
+ *               - password
+ *               - newPassword
  *             properties:
- *               email:
+ *               password:
  *                 type: string
- *                 format: email
- *                 example: user@example.com
+ *               newPassword:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Updated successfully
@@ -136,21 +123,14 @@ usersRouter.patch("/:id/email", userController.updateEmail);
  *       404:
  *         description: Bad request
  */
-usersRouter.patch("/:id/password", userController.updatePassword);
+usersRouter.patch("/password", userController.updatePassword);
 
 /**
  * @swagger
- * /api/users/{id}/firstname:
+ * /api/users/firstname:
  *   patch:
  *     summary: Изменить Имя пользователя
  *     tags: [Users]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: ID пользователя
  *     requestBody:
  *       required: true
  *       content:
@@ -175,21 +155,14 @@ usersRouter.patch("/:id/password", userController.updatePassword);
  *       404:
  *         description: Bad request
  */
-usersRouter.patch("/:id/firstname", userController.updateFirstname);
+usersRouter.patch("/firstname", userController.updateFirstname);
 
 /**
  * @swagger
- * /api/users/{id}/lastname:
+ * /api/users/lastname:
  *   patch:
  *     summary: Изменить Фамилию пользователя
  *     tags: [Users]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: ID пользователя
  *     requestBody:
  *       required: true
  *       content:
@@ -214,21 +187,14 @@ usersRouter.patch("/:id/firstname", userController.updateFirstname);
  *       404:
  *         description: Bad request
  */
-usersRouter.patch("/:id/lastname", userController.updateLastname);
+usersRouter.patch("/lastname", userController.updateLastname);
 
 /**
  * @swagger
- * /api/users/{id}/avatar:
+ * /api/users/avatar:
  *   patch:
  *     summary: Изменить avatar пользователя
  *     tags: [Users]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: ID пользователя
  *     requestBody:
  *       required: true
  *       content:
@@ -253,6 +219,72 @@ usersRouter.patch("/:id/lastname", userController.updateLastname);
  *       404:
  *         description: Bad request
  */
-usersRouter.patch("/:id/avatar", uploadPhoto, userController.updateAvatar);
+usersRouter.patch("/avatar", uploadPhoto, userController.updateAvatar);
+
+/**
+ * @swagger
+ * /api/users/avatar:
+ *   delete:
+ *     summary: Удалить avatar пользователя
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID пользователя
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+usersRouter.delete("/avatar", userController.deleteAvatar);
+
+/**
+ * @swagger
+ * /api/users/profile:
+ *   patch:
+ *     summary: Изменить Профиль пользователя
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - firstname
+ *               - lastname
+ *               - email
+ *             properties:
+ *               firstname:
+ *                 type: string
+ *               lastname:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+usersRouter.patch("/profile", userController.updateProfile)
 
 export { usersRouter };
