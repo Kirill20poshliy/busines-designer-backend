@@ -124,7 +124,7 @@ class ProjectsService {
 
         const client = await pool.connect();
 
-        const data = client.query(
+        const data = await client.query(
             `
             UPDATE projects
             SET 

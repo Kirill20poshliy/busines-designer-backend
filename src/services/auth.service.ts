@@ -74,7 +74,7 @@ class AuthService {
 
     async refresh(refreshToken: string): Promise<ITokens & { data: IUserDto }> {
         const tokenDB = await tokensService.findToken(refreshToken);
-        const validate = tokensService.validateRefreshToken(refreshToken);
+        const validate = await tokensService.validateRefreshToken(refreshToken);
 
         if (!validate || !tokenDB) {
             throw new Error("Ошибка токенов!");

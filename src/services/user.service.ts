@@ -259,7 +259,7 @@ class UserService {
 
         const client = await pool.connect();
 
-        const data = client.query(
+        const data = await client.query(
             `
             UPDATE users
             SET 
