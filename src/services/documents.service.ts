@@ -108,7 +108,7 @@ class DocumentsService {
                 name = $1, 
                 updated_at = NOW()
             WHERE id = $2
-                AND author_id = $3;
+                AND author_id = $3
             RETURNING *`,
             [name, id, authorId]
         );
@@ -132,7 +132,7 @@ class DocumentsService {
                 project_id = $1, 
                 updated_at = NOW()
             WHERE id = $2
-                AND author_id = $3;
+                AND author_id = $3
             RETURNING *`,
             [projectId, id, authorId]
         );
