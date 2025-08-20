@@ -87,8 +87,8 @@ class ProjectsService {
                 name = $1, 
                 updated_at = NOW()
             WHERE id = $2
-                AND author_id = $3;
-            RETURNING *`,
+                AND author_id = $3
+            RETURNING *;`,
             [name, id, authorId]
         );
 

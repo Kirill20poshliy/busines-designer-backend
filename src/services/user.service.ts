@@ -113,11 +113,12 @@ class UserService {
             SET 
                 email = $1, 
                 updated_at = NOW()
-            WHERE id = $2;`,
+            WHERE id = $2
+            RETURNING *`,
             [body.email, id]
         );
 
-        if (!data) {
+        if (!data.rows.length) {
             throw new Error(`Error while user "${id}" email updating.`);
         }
 
@@ -162,11 +163,12 @@ class UserService {
             SET 
                 password = $1, 
                 updated_at = NOW()
-            WHERE id = $2;`,
+            WHERE id = $2
+            RETURNING *`,
             [hashPass, id]
         );
 
-        if (!data) {
+        if (!data.rows.length) {
             throw new Error(`Error while user "${id}" password updating.`);
         }
 
@@ -190,11 +192,12 @@ class UserService {
                 firstname = $1, 
                 name = $2, 
                 updated_at = NOW()
-            WHERE id = $3;`,
+            WHERE id = $3
+            RETURNING *`,
             [firstname, [user.data.lastname, firstname].join(" "), id]
         );
 
-        if (!data) {
+        if (!data.rows.length) {
             throw new Error(`Error while user "${id}" firstname updating.`);
         }
 
@@ -218,11 +221,12 @@ class UserService {
                 lastname = $1, 
                 name = $2, 
                 updated_at = NOW()
-            WHERE id = $3;`,
+            WHERE id = $3
+            RETURNING *`,
             [lastname, [lastname, user.data.firstname].join(" "), id]
         );
 
-        if (!data) {
+        if (!data.rows.length) {
             throw new Error(`Error while user "${id}" lastname updating.`);
         }
 
@@ -252,11 +256,12 @@ class UserService {
             SET 
                 pict_url = $1,
                 updated_at = NOW()
-            WHERE id = $2`,
+            WHERE id = $2
+            RETURNING *`,
             [fileData.photoUrl, userId]
         );
 
-        if (!data) {
+        if (!data.rows.length) {
             throw new Error(`Error while user "${userId}" avatar updating.`);
         }
 
@@ -270,11 +275,12 @@ class UserService {
             SET 
                 pict_url = null,
                 updated_at = NOW()
-            WHERE id = $1`,
+            WHERE id = $1
+            RETURNING *`,
             [userId]
         );
 
-        if (!data) {
+        if (!data.rows.length) {
             throw new Error(`Error while deleting user avatar`);
         }
 
@@ -318,7 +324,8 @@ class UserService {
                 name = $3, 
                 email = $4,
                 updated_at = NOW()
-            WHERE id = $5;`,
+            WHERE id = $5
+            RETURNING *`,
             [
                 firstname,
                 lastname,
@@ -328,7 +335,7 @@ class UserService {
             ]
         );
 
-        if (!data) {
+        if (!data.rows.length) {
             throw new Error(`Error while user "${userId}" profile updating.`);
         }
 
