@@ -104,6 +104,25 @@ class DocumentsController {
         }
     }
 
+    async updateDesc(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+            const { desc } = req.body as { desc: string };
+
+            const data = await documentsService.updateDesc(
+                id,
+                desc,
+            );
+
+            res.status(200).json(data);
+        } catch (e) {
+            console.log(e);
+            res.status(500).json({
+                message: `Error updating document -> ${e}`,
+            });
+        }
+    }
+
     async updateProject(req: IAuthRequest, res: Response) {
         try {
             const { id } = req.params;

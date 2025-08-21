@@ -166,6 +166,25 @@ class DocumentsService {
         return { message: "success" };
     }
 
+    async updateDesc(id: string, desc: string): Promise<{ message: string }> {
+        const data = await pool.query(
+            `
+            UPDATE documents
+            SET 
+                "desc" = $1, 
+                updated_at = NOW()
+            WHERE id = $2
+            RETURNING *`,
+            [desc, id]
+        );
+
+        if (!data.rows.length) {
+            throw new Error(`Error while document "${id}" desc updating.`);
+        }
+
+        return { message: "success" };
+    }
+
     async updatePicture(
         userId: string,
         objectId: string,
@@ -206,7 +225,8 @@ class DocumentsService {
     }
 
     async deletePicture(documentId: string, authorId: string) {
-        const deletable = await pool.query(`
+        const deletable = await pool.query(
+            `
             UPDATE documents
             SET 
                 pict_url = null,
@@ -215,13 +235,15 @@ class DocumentsService {
                 AND author_id = $2
             RETURNING *`,
             [documentId, authorId]
-        )
+        );
 
         if (!deletable.rows.length) {
-            throw new Error(`Error while deleting project "${documentId}" picture`)
+            throw new Error(
+                `Error while deleting project "${documentId}" picture`
+            );
         }
 
-        return { message: 'success' }
+        return { message: "success" };
     }
 
     async delete(id: string, authorId: string) {

@@ -209,6 +209,45 @@ docsRouter.patch("/:id/content", documentsController.updateContent);
 
 /**
  * @swagger
+ * /api/documents/{id}/desc:
+ *   patch:
+ *     summary: Изменить описание документа
+ *     tags: [Documents]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID документа
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - desc
+ *             properties:
+ *               desc:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Document data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+docsRouter.patch("/:id/desc", documentsController.updateDesc);
+
+/**
+ * @swagger
  * /api/documents/{id}/picture:
  *   patch:
  *     summary: Изменить изображение документа
