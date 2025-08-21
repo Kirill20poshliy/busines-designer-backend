@@ -10,8 +10,9 @@
     "migrate:prod": "node dist/db/migrate.js",
     "create-superuser": "ts-node src/db/superuser.ts",
     "create-superuser:prod": "node dist/db/superuser.js",
-    "build": "tsc",
-    "lint": "tslint -c tslint.json src/**/*.ts"
+    "build": "tsc && npm run copy:migrations",
+    "lint": "tslint -c tslint.json src/**/*.ts",
+    "copy:migrations": "copyfiles -u 1 src/db/migrations/**/*.sql dist/"
   },
   "author": "",
   "license": "ISC",
@@ -46,9 +47,11 @@
     "@types/pg": "^8.15.5",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
+    "copyfiles": "^2.4.1",
     "install": "^0.13.0",
     "nodemon": "^3.1.10",
     "npm": "^10.9.3",
+    "onchange": "^7.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }

@@ -2,6 +2,7 @@ export const DocumentSchema = `
     CREATE TABLE IF NOT EXISTS documents (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
+        "desc" TEXT,
         content TEXT,
         project_id INTEGER,
         FOREIGN KEY (project_id) REFERENCES projects(id),
