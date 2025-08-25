@@ -175,19 +175,24 @@ class ProjectsService {
     async updateData(
         id: string,
         name: string,
-        pictUrl: string,
+        filePath: string | undefined,
+        mimetype: string | undefined,
         userId: string
     ): Promise<{ message: string }> {
+
+        if (filePath && mimetype) {
+            await this.updatePicture(userId, id, filePath, mimetype)
+        }
+
         const data = await pool.query(`
             UPDATE projects
             SET
                 name = $1,
-                pict_url = $2,
                 updated_at = NOW()
-            WHERE id = $3
-                AND author_id = $4
+            WHERE id = $2
+                AND author_id = $3
             RETURNING *`,
-            [name, pictUrl, id, userId]
+            [name, id, userId]
         )
 
         if (!data.rows.length) {

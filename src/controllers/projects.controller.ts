@@ -182,12 +182,15 @@ class ProjectsController {
                     .json({ message: "Bad request" });
             }
             
-            const { name, pictUrl } = req.body as { name: string, pictUrl: string };
+            const { name } = req.body as { name: string };
+            const filePath = req.file?.path;
+            const mimetype = req.file?.mimetype;
 
             const data = await projectsService.updateData(
                 id,
                 name,
-                pictUrl,
+                filePath,
+                mimetype,
                 userId
             );
 
