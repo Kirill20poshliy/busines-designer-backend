@@ -20,6 +20,4 @@ RUN mkdir -p /usr/app/backend/uploads
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "npm run migrate:prod && node dist/app.js"]
-# CMD sh -c "npm run migrate:prod && node dist/app.js"
-# CMD ["node", "dist/app.js"]
+CMD ["sh", "-c", "npm run node dist/app.js && migrate:prod"]

@@ -208,17 +208,16 @@ projectsRouter.patch("/:id/picture", projectsController.deletePicture);
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
- *             required:
- *               - name
- *               - pictUrl
  *             properties:
  *               name:
  *                 type: string
- *               pictUrl:
+ *               photo:
  *                 type: string
+ *                 format: binary
+ *                 description: Файл изображения (JPEG, PNG)
  *     responses:
  *       200:
  *         description: Project data
@@ -232,7 +231,7 @@ projectsRouter.patch("/:id/picture", projectsController.deletePicture);
  *       404:
  *         description: Bad request
  */
-projectsRouter.patch("/:id/data", projectsController.updateData);
+projectsRouter.patch("/:id/data", uploadPhoto, projectsController.updateData);
 
 /**
  * @swagger
