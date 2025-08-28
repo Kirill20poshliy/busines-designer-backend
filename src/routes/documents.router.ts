@@ -364,3 +364,4 @@ docsRouter.delete("/:id/picture", documentsController.deletePicture);
 docsRouter.delete("/:id", documentsController.delete);
 
 export { docsRouter };
+
