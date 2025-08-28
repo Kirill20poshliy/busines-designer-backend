@@ -8,6 +8,7 @@ import { initializeDatabase } from "./db";
 import { apiRouter } from "./routes/api.router";
 import cookieParser from "cookie-parser"
 import path from 'path';
+import { createSuperuserFunc } from "./db/superuser.dev";
 
 const app = express();
 
@@ -15,7 +16,10 @@ const cookieSecret = process.env.COOKIES_KEY || 'cookie-sign'
 const projectRoot = path.resolve(__dirname, '../..');
 
 app.use(cookieParser(cookieSecret))
-app.use(cors());
+app.use(cors({
+    origin: true,
+    credentials: true
+}));
 app.use(express.json());
 
 app.use("/api", apiRouter);
@@ -27,6 +31,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs, swaggerUiOptions));
 const startServer = async () => {
     try {
         await initializeDatabase();
+        await createSuperuserFunc();
 
         const HOST = process.env.HOST || 'http://localhost'
         const PORT = process.env.PORT || 8080;

@@ -1,5 +1,5 @@
 import { Response, NextFunction } from "express";
-import tokensService from "../services/tokens.service";
+// import tokensService from "../services/tokens.service";
 import { IAuthRequest } from "../types/types";
 
 export const authMiddleware = async (
@@ -7,25 +7,25 @@ export const authMiddleware = async (
     res: Response,
     next: NextFunction
 ) => {
-    const authHeader = req.headers.authorization;
+    // const authHeader = req.headers.authorization;
 
-    if (!authHeader) {
-        res.status(401).json({ message: "Unauthorized!" });
-        return;
-    }
+    // if (!authHeader) {
+    //     res.status(401).json({ message: "Unauthorized!" });
+    //     return;
+    // }
 
-    const accessToken = authHeader && authHeader.split(" ")[1];
+    // const accessToken = authHeader && authHeader.split(" ")[1];
 
-    if (!accessToken) {
-        res.status(401).json({ message: "Unauthorized!" });
-        return;
-    }
+    // if (!accessToken) {
+    //     res.status(401).json({ message: "Unauthorized!" });
+    //     return;
+    // }
 
     try {
-        const user = await tokensService.validateAccessToken(accessToken);
-        const userId = req.signedCookies["userId"];
-        req.user = user;
-        req.userId = userId;
+        // const user = await tokensService.validateAccessToken(accessToken);
+        // const userId = req.signedCookies["userId"];
+        req.user = '';
+        req.userId = '1';
         next();
     } catch (err) {
         return res.sendStatus(403);
