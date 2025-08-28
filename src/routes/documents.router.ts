@@ -80,6 +80,8 @@ docsRouter.get("/", documentsController.getAll);
  *                 type: string
  *               projectId:
  *                 type: number
+ *               desc:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Document created successfully
@@ -364,3 +366,4 @@ docsRouter.delete("/:id/picture", documentsController.deletePicture);
 docsRouter.delete("/:id", documentsController.delete);
 
 export { docsRouter };
+

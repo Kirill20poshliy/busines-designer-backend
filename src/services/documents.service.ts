@@ -9,7 +9,8 @@ class DocumentsService {
     async create(
         name: string,
         authorId: string,
-        projectId: string
+        projectId: string,
+        desc: string,
     ): Promise<{ data: IDocument }> {
         const author = await userService.getOne(authorId);
 
@@ -27,13 +28,14 @@ class DocumentsService {
             `
             INSERT INTO documents (
                 name,
+                "desc",
                 author_id,
                 author_name,
                 project_id,
                 project_name
-            ) VALUES ($1, $2, $3, $4, $5)
+            ) VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *`,
-            [name, authorId, author.data.name, projectId, project.data.name]
+            [name, desc ?? null, authorId, author.data.name, projectId, project.data.name]
         );
 
         if (!data.rows.length) {
@@ -352,3 +354,4 @@ class DocumentsService {
 }
 
 export default new DocumentsService();
+

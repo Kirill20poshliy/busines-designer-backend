@@ -41,10 +41,7 @@ const createSuperuser = async () => {
                 password
             ) VALUES (
                 $1,
-                $2,
-                $3,
-                $4,
-                $5
+                $2
             );`,
             [
                 'Иван', 
