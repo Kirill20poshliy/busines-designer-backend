@@ -1,5 +1,6 @@
 import { pool } from "../db";
 import { IDocument } from "../models/document.model";
+import { IPagination } from "../types/types";
 import filesService from "./files.service";
 import projectsService from "./projects.service";
 import userService from "./user.service";
@@ -43,31 +44,116 @@ class DocumentsService {
     }
 
     async getAll(
-        projectId: string
-    ): Promise<{ data: Omit<IDocument, "content">[] }> {
-        const data = await pool.query<Omit<IDocument, "content">>(
+        projectId: string,
+        limit: string = "30",
+        page: string = "1",
+        field: string = "updated_at",
+        order: string = "DESC",
+        search: string = ""
+    ): Promise<{pagination: IPagination, data: Omit<IDocument, "content">[] }> {
+        const fields = ["name", "created_at", "updated_at"];
+        const orders = ["ASC", "DESC"];
+    
+        const offset = (Number(page) - 1) * Number(limit);
+    
+        const sortField = fields.includes(field) ? field : "updated_at";
+        const sortOrder = orders.includes(order.toUpperCase())
+            ? order.toUpperCase()
+            : "DESC";
+        
+        const data = await pool.query(
             `
+            WITH documents_data AS (
+                SELECT
+                    id,
+                    name,
+                    project_id,
+                    project_name,
+                    author_id,
+                    author_name,
+                    pict_url,
+                    created_at,
+                    updated_at,
+                    COUNT(*) OVER() as total_count
+                FROM documents
+                WHERE project_id = $1 
+                    AND name ILIKE $4
+                ORDER BY ${sortField} ${sortOrder}
+                LIMIT $2
+                OFFSET $3
+            )
             SELECT
-                id,
-                name,
-                project_id,
-                project_name,
-                author_id,
-                author_name,
-                pict_url,
-                created_at,
-                updated_at
-            FROM documents
-            WHERE project_id = $1
-            ORDER BY updated_at DESC`,
-            [projectId]
+                json_agg(
+                    json_build_object(
+                        'id', id,
+                        'name', name,
+                        'project_id', project_id,
+                        'project_name', project_name,
+                        'author_id', author_id,
+                        'author_name', author_name,
+                        'pict_url', pict_url,
+                        'created_at', created_at,
+                        'updated_at', updated_at
+                    )
+                ) as data,
+                MAX(total_count) as total_count
+            FROM documents_data
+            `,
+            [projectId, limit, offset, `%${search}%`]
         );
+        // const data = await pool.query<Omit<IDocument, "content">>(
+        //     `
+        //     SELECT
+        //         id,
+        //         name,
+        //         project_id,
+        //         project_name,
+        //         author_id,
+        //         author_name,
+        //         pict_url,
+        //         created_at,
+        //         updated_at
+        //     FROM documents
+        //     WHERE project_id = $1
+        //     ORDER BY updated_at DESC`,
+        //     [projectId]
+        // );
 
         if (!data) {
             throw new Error("Error while getting documents.");
         }
 
-        return { data: data.rows };
+        const total = Number(data.rows[0]?.total_count) || 0;
+        const totalPages = Math.ceil(total / Number(limit));
+        const currentPage = Number(page);
+
+        const generateUrl = (pageNum: number): string => {
+            const url = new URL(`/api/documents/${projectId}`, process.env.HOST);
+            url.searchParams.set("project", projectId.toString());
+            url.searchParams.set("limit", limit.toString());
+            url.searchParams.set("page", pageNum.toString());
+            url.searchParams.set("field", field);
+            url.searchParams.set("order", order);
+            if (search) {
+                url.searchParams.set("search", search);
+            }
+            return url.pathname + url.search;
+        };
+
+        const prevPage = currentPage > 1 ? currentPage - 1 : null;
+        const nextPage = currentPage < totalPages ? currentPage + 1 : null;
+
+        return { 
+            pagination: {
+                page: currentPage,
+                limit: Number(limit),
+                total,
+                total_pages: totalPages,
+                prev: prevPage ? generateUrl(prevPage) : null,
+                next: nextPage ? generateUrl(nextPage) : null,
+            },
+            data: data.rows[0]?.data || [],
+         };
     }
 
     async getOne(id: string): Promise<{ data: IDocument }> {
