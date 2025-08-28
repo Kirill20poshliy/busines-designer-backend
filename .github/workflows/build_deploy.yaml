@@ -34,4 +34,4 @@ jobs:
           SOURCE: './'
           ARGS: '-avz --delete --exclude=/.git/ --exclude=/.github/ --exclude=/node_modules/'
           RUN_SCRIPT_ON: 'target'
-          POST_SCRIPT: 'cd /var/www/business-designer-backend/ && docker compose up -d --build'
+          POST_SCRIPT: 'cd /var/www/business-designer-backend/ && docker compose down && docker compose up -d --build'
