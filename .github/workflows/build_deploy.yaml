@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ master, develop ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ master, develop ]
+    branches: [ main, develop ]
 
 
 jobs:
@@ -31,7 +31,7 @@ jobs:
 
       - name: Deploy to server using rsync
         uses: up9cloud/action-rsync@master
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           USER: deploy-user
           HOST: ${{secrets.DEPLOY_HOST}}
