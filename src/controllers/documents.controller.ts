@@ -5,7 +5,10 @@ import documentsService from "../services/documents.service";
 class DocumentsController {
     async create(req: IAuthRequest, res: Response) {
         try {
-            const { name, projectId } = req.body as { name: string, projectId: string };
+            const { name, projectId } = req.body as {
+                name: string;
+                projectId: string;
+            };
             const userId = req.userId;
 
             if (!userId) {
@@ -27,14 +30,29 @@ class DocumentsController {
 
     async getAll(req: Request, res: Response) {
         try {
-            const { project_id } = req.query as { project_id: string };
+            const { project_id, limit, page, field, order, search } =
+                req.query as {
+                    project_id: string;
+                    limit: string;
+                    page: string;
+                    field: string;
+                    order: string;
+                    search: string;
+                };
             if (!project_id) {
                 return res
                     .status(400)
                     .json({ message: "project_id query param are required" });
             }
 
-            const data = await documentsService.getAll(project_id);
+            const data = await documentsService.getAll(
+                project_id,
+                limit,
+                page,
+                field,
+                order,
+                search
+            );
 
             res.status(200).json(data);
         } catch (e) {
@@ -70,11 +88,7 @@ class DocumentsController {
                     .json({ message: "Current user ID are required" });
             }
 
-            const data = await documentsService.updateName(
-                id,
-                name,
-                userId
-            );
+            const data = await documentsService.updateName(id, name, userId);
 
             res.status(200).json(data);
         } catch (e) {
@@ -90,10 +104,7 @@ class DocumentsController {
             const { id } = req.params;
             const { content } = req.body as { content: string };
 
-            const data = await documentsService.updateContent(
-                id,
-                content,
-            );
+            const data = await documentsService.updateContent(id, content);
 
             res.status(200).json(data);
         } catch (e) {
@@ -109,10 +120,7 @@ class DocumentsController {
             const { id } = req.params;
             const { desc } = req.body as { desc: string };
 
-            const data = await documentsService.updateDesc(
-                id,
-                desc,
-            );
+            const data = await documentsService.updateDesc(id, desc);
 
             res.status(200).json(data);
         } catch (e) {
@@ -164,17 +172,23 @@ class DocumentsController {
                     .json({ message: "Current user ID are required" });
             }
 
-
             const { id } = req.params;
             const filePath = req.file.path;
             const mimetype = req.file.mimetype;
 
-            const data = await documentsService.updatePicture(userId, id, filePath, mimetype);
+            const data = await documentsService.updatePicture(
+                userId,
+                id,
+                filePath,
+                mimetype
+            );
 
             res.status(201).json(data);
         } catch (e) {
-            console.log(e)
-            res.status(500).json({ message: `Error updating document picture -> ${e}` });
+            console.log(e);
+            res.status(500).json({
+                message: `Error updating document picture -> ${e}`,
+            });
         }
     }
 
@@ -191,17 +205,17 @@ class DocumentsController {
             const { id } = req.params;
 
             if (!id) {
-                return res
-                    .status(400)
-                    .json({ message: "Bad request" });
+                return res.status(400).json({ message: "Bad request" });
             }
 
             const data = await documentsService.deletePicture(id, userId);
 
             res.status(200).json(data);
         } catch (e) {
-            console.log(e)
-            res.status(500).json({ message: `Error deleting document picture -> ${e}` });
+            console.log(e);
+            res.status(500).json({
+                message: `Error deleting document picture -> ${e}`,
+            });
         }
     }
 

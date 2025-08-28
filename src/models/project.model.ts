@@ -12,7 +12,7 @@
  *         pict_url:
  *           type: string
  *         author_id:
- *           type: number
+ *           type: string
  *         author_name:
  *           type: string
  *         created_at:
@@ -25,7 +25,7 @@ export interface IProject {
     id: string;
     name: string;
     pict_url: string;
-    author_id: number;
+    author_id: string;
     author_name: string;
     created_at: string;
     updated_at: string;

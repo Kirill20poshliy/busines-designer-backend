@@ -24,14 +24,39 @@ const docsRouter = Router();
  *         name: project_id
  *         schema:
  *           type: string
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: field
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Document'
+ *               type: object
+ *               properties:
+ *                 pagination:
+ *                   $ref: '#components/schemas/Pagination'
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Document'
  */
 docsRouter.get("/", documentsController.getAll);
 
