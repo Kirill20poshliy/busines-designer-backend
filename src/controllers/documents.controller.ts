@@ -229,3 +229,4 @@ class DocumentsController {
 }
 
 export default new DocumentsController();
+

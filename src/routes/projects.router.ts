@@ -255,3 +255,4 @@ projectsRouter.patch("/:id/data", uploadPhoto, projectsController.updateData);
 projectsRouter.delete("/:id", projectsController.delete);
 
 export { projectsRouter };
+
