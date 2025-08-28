@@ -9,6 +9,8 @@
  *           type: string
  *         name:
  *           type: string
+ *         desc:
+ *           type: string
  *         content:
  *           type: string
  *         project_id:
@@ -30,6 +32,7 @@
 export interface IDocument {
     id: string;
     name: string;
+    desc: string;
     content: string;
     project_id: number;
     project_name: string;
