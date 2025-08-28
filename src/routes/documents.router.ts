@@ -80,6 +80,8 @@ docsRouter.get("/", documentsController.getAll);
  *                 type: string
  *               projectId:
  *                 type: number
+ *               desc:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Document created successfully

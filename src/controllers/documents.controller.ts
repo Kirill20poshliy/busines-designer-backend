@@ -5,9 +5,10 @@ import documentsService from "../services/documents.service";
 class DocumentsController {
     async create(req: IAuthRequest, res: Response) {
         try {
-            const { name, projectId } = req.body as {
+            const { name, projectId, desc } = req.body as {
                 name: string;
                 projectId: string;
+                desc: string;
             };
             const userId = req.userId;
 
@@ -17,7 +18,7 @@ class DocumentsController {
                     .json({ message: "Current user ID are required" });
             }
 
-            const data = await documentsService.create(name, userId, projectId);
+            const data = await documentsService.create(name, userId, projectId, desc);
 
             res.status(201).json(data);
         } catch (e) {
