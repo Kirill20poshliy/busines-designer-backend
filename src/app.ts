@@ -8,6 +8,7 @@ import { initializeDatabase } from "./db";
 import { apiRouter } from "./routes/api.router";
 import cookieParser from "cookie-parser"
 import path from 'path';
+import { createSuperuserFunc } from "./db/superuser.dev";
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs, swaggerUiOptions));
 const startServer = async () => {
     try {
         await initializeDatabase();
+        await createSuperuserFunc();
 
         const HOST = process.env.HOST || 'http://localhost'
         const PORT = process.env.PORT || 8080;
