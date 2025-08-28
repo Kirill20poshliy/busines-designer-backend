@@ -35,4 +35,6 @@ jobs:
           KEY: ${{secrets.DEPLOY_SSH_KEY}}
           TARGET: /var/www/business-designer-backend/
           SOURCE: './'
-          POST_SCRIPT: 'docker compose up -d --build'
+          ARGS: '-avz --delete --exclude=/.git/ --exclude=/.github/ --exclude=/node_modules/'
+          RUN_SCRIPT_ON: 'target'
+          POST_SCRIPT: 'cd /var/www/business-designer-backend/ && docker compose up -d --build'
