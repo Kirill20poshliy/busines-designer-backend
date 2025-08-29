@@ -28,7 +28,6 @@ jobs:
 
       - name: Deploy to server using rsync
         uses: up9cloud/action-rsync@master
-        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         env:
           USER: deploy-user
           HOST: ${{secrets.DEPLOY_HOST}}
