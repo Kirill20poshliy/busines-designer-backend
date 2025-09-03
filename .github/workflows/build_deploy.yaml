@@ -28,7 +28,7 @@ jobs:
 
       - name: Deploy to server using rsync
         uses: up9cloud/action-rsync@master
-        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           USER: deploy-user
           HOST: ${{secrets.DEPLOY_HOST}}
@@ -37,5 +37,4 @@ jobs:
           SOURCE: './'
           ARGS: '-avz --delete --exclude=/.git/ --exclude=/.github/ --exclude=/node_modules/'
           RUN_SCRIPT_ON: 'target'
-          PRE_SCRIPT: 'cd /var/www/business-designer-backend/ && docker compose down'
-          POST_SCRIPT: 'cd /var/www/business-designer-backend/ && docker compose up -d --build'
+          POST_SCRIPT: 'cd /var/www && bash ./deploy.sh'
