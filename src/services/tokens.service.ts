@@ -16,10 +16,10 @@ class TokensService {
 
     generateTokens(payload: object): ITokens {
         const accessToken = jwt.sign(payload, this.accessTokenKey, {
-            expiresIn: "30d",
+            expiresIn: "30m",
         });
         const refreshToken = jwt.sign(payload, this.refreshTokenKey, {
-            expiresIn: "30m",
+            expiresIn: "30d",
         });
         return {
             accessToken,
