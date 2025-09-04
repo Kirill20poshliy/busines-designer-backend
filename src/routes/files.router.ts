@@ -1,6 +1,7 @@
 import express from "express";
 import filesController from "../controllers/files.controller";
 import { uploadPhoto } from "../middleware/files.middleware";
+import { authMiddleware } from "../middleware/auth.middleware";
 
 const filesRouter = express.Router();
 
@@ -44,7 +45,7 @@ const filesRouter = express.Router();
  *       500:
  *         description: Internal server error
  */
-filesRouter.post("/", uploadPhoto, filesController.upload);
+filesRouter.post("/", authMiddleware, uploadPhoto, filesController.upload);
 
 /**
  * @swagger
@@ -90,6 +91,6 @@ filesRouter.get("/:id", filesController.getFile);
  *       404:
  *         description: Bad request
  */
-filesRouter.delete("/:id", filesController.deleteFile);
+filesRouter.delete("/:id", authMiddleware, filesController.deleteFile);
 
 export { filesRouter };

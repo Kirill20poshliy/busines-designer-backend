@@ -12,6 +12,6 @@ apiRouter.use("/auth", authRouter);
 apiRouter.use("/users", authMiddleware, usersRouter);
 apiRouter.use("/projects", authMiddleware, projectsRouter);
 apiRouter.use("/documents", authMiddleware, docsRouter);
-apiRouter.use("/files", authMiddleware, filesRouter)
+apiRouter.use("/files", filesRouter)
 
 export { apiRouter }
