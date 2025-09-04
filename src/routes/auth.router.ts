@@ -93,7 +93,7 @@ authRouter.post('/login', authController.login);
 /**
  * @swagger
  * /api/auth/refresh:
- *   post:
+ *   get:
  *     summary: Обновить токены
  *     tags: [Authentication]
  *     requestBody:
@@ -133,7 +133,7 @@ authRouter.post('/login', authController.login);
  *       500:
  *         description: Internal server error
  */
-authRouter.post('/refresh', authController.refresh);
+authRouter.get('/refresh', authController.refresh);
 
 /**
  * @swagger

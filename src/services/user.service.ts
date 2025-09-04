@@ -17,7 +17,7 @@ class UserService {
                 password,
                 firstname,
                 lastname,
-                name,
+                name
             ) VALUES ($1, $2, $3, $4, $5)
             RETURNING id, email, created_at`,
             [
