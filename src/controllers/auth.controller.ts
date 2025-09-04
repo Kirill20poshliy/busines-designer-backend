@@ -37,8 +37,8 @@ class AuthController {
 
             const data = await authService.login(email, password);
 
-            res.cookie('refreshToken', data.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: true})
-            res.cookie('userId', data.data.id, {httpOnly: true, signed: true, secure: true})
+            res.cookie('refreshToken', data.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: true, sameSite: 'none'})
+            res.cookie('userId', data.data.id, {httpOnly: true, signed: true, secure: true, sameSite: 'none'})
             res.status(200).json(data);
         } catch (e) {
             console.log(e)
