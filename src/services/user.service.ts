@@ -19,7 +19,7 @@ class UserService {
                 lastname,
                 name
             ) VALUES ($1, $2, $3, $4, $5)
-            RETURNING id, email, created_at`,
+            RETURNING *`,
             [
                 email,
                 password,
@@ -85,6 +85,10 @@ class UserService {
             SELECT
                 id,
                 email,
+                firstname,
+                lastname,
+                name,
+                pict_url,
                 password,
                 created_at
             FROM users

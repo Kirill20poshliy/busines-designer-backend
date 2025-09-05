@@ -3,14 +3,14 @@ import { UserDto } from "../dtos/user.dto";
 import userService from "./user.service";
 import bcrypt from "bcryptjs";
 import tokensService from "./tokens.service";
-import { IUserDto } from "../models/user.model";
+import { IUser, IUserDto } from "../models/user.model";
 
 class AuthService {
     async register(
         email: string,
         password: string,
         firstname?: string,
-        lastname?: string,
+        lastname?: string
     ): Promise<ITokens & { data: IUserDto }> {
         const candidate = await userService.getOneByEmail(email);
 
@@ -20,7 +20,12 @@ class AuthService {
 
         const hashPass = await bcrypt.hash(password, 3);
 
-        const user = await userService.create(email, hashPass, firstname, lastname);
+        const user = await userService.create(
+            email,
+            hashPass,
+            firstname,
+            lastname
+        );
 
         const userDto = new UserDto(user.id, user.email);
 
@@ -72,7 +77,13 @@ class AuthService {
         return token;
     }
 
-    async refresh(refreshToken: string): Promise<ITokens & { data: IUserDto }> {
+    async refresh(
+        refreshToken: string
+    ): Promise<
+        ITokens & {
+            data: Omit<IUser, "created_at" | "updated_at" | "password">;
+        }
+    > {
         const tokenDB = await tokensService.findToken(refreshToken);
         const validate = await tokensService.validateRefreshToken(refreshToken);
 
@@ -84,7 +95,9 @@ class AuthService {
         const user = await userService.getOne(id);
 
         if (!user || user.data === null) {
-            throw new Error(`Админа с id: ${tokenDB.user_id} не существует!`);
+            throw new Error(
+                `Пользователя с id: ${tokenDB.user_id} не существует!`
+            );
         }
 
         const userDto = new UserDto(user.data?.id, user.data.email);
@@ -93,7 +106,13 @@ class AuthService {
         await tokensService.saveToken(userDto.id, tokens.refreshToken);
         return {
             ...tokens,
-            data: userDto,
+            data: {
+                ...userDto,
+                firstname: user.data.firstname,
+                lastname: user.data.lastname,
+                name: user.data.name,
+                pict_url: user.data.pict_url,
+            },
         };
     }
 }
