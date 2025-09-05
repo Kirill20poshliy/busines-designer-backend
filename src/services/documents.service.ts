@@ -90,6 +90,7 @@ class DocumentsService {
                     json_build_object(
                         'id', id,
                         'name', name,
+                        'desc', "desc",
                         'project_id', project_id,
                         'project_name', project_name,
                         'author_id', author_id,
