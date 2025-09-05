@@ -303,6 +303,41 @@ usersRouter.delete("/avatar", userController.deleteAvatar);
  *       404:
  *         description: Bad request
  */
-usersRouter.patch("/profile", userController.updateProfile)
+usersRouter.patch("/profile", userController.updateProfile);
+
+/**
+ * @swagger
+ * /api/users/profile-low:
+ *   patch:
+ *     summary: Изменить Профиль пользователя, используя только полное имя и email
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+usersRouter.patch("/profile-low", userController.updateProfileLow);
 
 export { usersRouter };

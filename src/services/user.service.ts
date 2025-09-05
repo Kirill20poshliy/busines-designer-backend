@@ -351,6 +351,46 @@ class UserService {
 
         return { message: "success" };
     }
+
+    async updateProfileLow(
+        userId: string,
+        name: string,
+        email: string
+    ): Promise<{ message: string }> {
+        const user = await this.getOne(userId);
+
+        if (!user) {
+            throw new Error(`User with id: "${userId}" doesn't exists.`);
+        }
+
+        const arrName = name.split(' ');
+
+        const data = await pool.query(
+            `
+            UPDATE users
+            SET 
+                firstname = $1,
+                lastname = $2,
+                name = $3, 
+                email = $4,
+                updated_at = NOW()
+            WHERE id = $5
+            RETURNING *`,
+            [
+                arrName[1] ?? '',
+                arrName[0] ?? '',
+                name,
+                email,
+                userId,
+            ]
+        );
+
+        if (!data.rows.length) {
+            throw new Error(`Error while user "${userId}" profile updating.`);
+        }
+
+        return { message: "success" };
+    }
 }
 
 export default new UserService();

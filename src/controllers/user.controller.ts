@@ -189,6 +189,26 @@ class UserController {
             res.status(500).json({ message: `Error updating user profile -> ${e}` });
         }
     }
+
+    async updateProfileLow(req: IAuthRequest, res: Response) {
+        try {
+            const userId = req.userId;
+
+            if (!userId) {
+                return res
+                    .status(403)
+                    .json({ message: "Current user ID are required" });
+            }
+            
+            const { name, email } = req.body;
+            const data = await userService.updateProfileLow(userId, name, email);
+
+            res.status(201).json(data)
+        } catch (e) {
+            console.log(e)
+            res.status(500).json({ message: `Error updating user profile -> ${e}` });
+        }
+    }
 }
 
 export default new UserController()
