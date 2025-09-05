@@ -356,7 +356,7 @@ class UserService {
         userId: string,
         name: string,
         email: string
-    ): Promise<{ message: string }> {
+    ): Promise<{ name: string, email: string }> {
         const user = await this.getOne(userId);
 
         if (!user) {
@@ -389,7 +389,7 @@ class UserService {
             throw new Error(`Error while user "${userId}" profile updating.`);
         }
 
-        return { message: "success" };
+        return { name, email };
     }
 }
 
