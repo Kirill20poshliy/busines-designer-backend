@@ -164,6 +164,7 @@ class DocumentsService {
             SELECT
                 id,
                 name,
+								content,
                 project_id,
                 project_name,
                 author_id,
