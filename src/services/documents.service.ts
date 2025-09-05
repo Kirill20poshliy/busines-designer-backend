@@ -69,7 +69,6 @@ class DocumentsService {
                 SELECT
                     id,
                     name,
-                    desc,
                     project_id,
                     project_name,
                     author_id,
@@ -90,7 +89,6 @@ class DocumentsService {
                     json_build_object(
                         'id', id,
                         'name', name,
-                        'desc', desc,
                         'project_id', project_id,
                         'project_name', project_name,
                         'author_id', author_id,
@@ -166,7 +164,6 @@ class DocumentsService {
             SELECT
                 id,
                 name,
-                desc,
                 content,
                 project_id,
                 project_name,
