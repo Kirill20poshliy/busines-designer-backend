@@ -69,6 +69,7 @@ class DocumentsService {
                 SELECT
                     id,
                     name,
+                    desc,
                     project_id,
                     project_name,
                     author_id,
@@ -164,7 +165,8 @@ class DocumentsService {
             SELECT
                 id,
                 name,
-								content,
+                desc,
+                content,
                 project_id,
                 project_name,
                 author_id,
