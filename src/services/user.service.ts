@@ -55,19 +55,25 @@ class UserService {
         return { data: data.rows };
     }
 
-    async getOne(id: string): Promise<{ data: IUserInfo }> {
-        const data = await pool.query<IUserInfo>(
+    async getOne(id: string): Promise<{ data: IUserInfo & {projects_count: number} }> {
+        const data = await pool.query<IUserInfo & {projects_count: number}>(
             `
             SELECT
-                id,
-                email,
-                firstname,
-                lastname,
-                name,
-                pict_url,
-                created_at
-            FROM users
-            WHERE id = $1
+                u.id,
+                u.email,
+                u.firstname,
+                u.lastname,
+                u.name,
+                u.pict_url,
+                u.created_at,
+                (
+                    SELECT 
+                        COUNT(*) 
+                    FROM projects p 
+                    WHERE p.author_id = u.id
+                ) AS projects_count
+            FROM users u
+            WHERE u.id = $1
             LIMIT 1;`,
             [id]
         );

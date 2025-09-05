@@ -27,6 +27,24 @@ class UserController {
         }
     }
 
+    async getProfile(req: IAuthRequest, res: Response) {
+        try {
+            const userId = req.userId;
+            if (!userId) {
+                return res
+                    .status(403)
+                    .json({ message: "Current user ID are required" });
+            }
+
+            const data = await userService.getOne(userId)
+
+            res.status(200).json(data)
+        } catch (e) {
+            console.log(e)
+            res.status(500).json({ message: `Error getting current user profile -> ${e}` });
+        }
+    }
+
     async updateEmail(req: IAuthRequest, res: Response) {
         try {
             const userId = req.userId;

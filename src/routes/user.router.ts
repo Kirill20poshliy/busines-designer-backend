@@ -58,6 +58,24 @@ usersRouter.get("/:id", userController.getOne);
 
 /**
  * @swagger
+ * /api/users/profile:
+ *   get:
+ *     summary: Получить пользователя по ID
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: Current user profile data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserInfo'
+ *       404:
+ *         description: Bad request
+ */
+usersRouter.get("/profile", userController.getProfile);
+
+/**
+ * @swagger
  * /api/users/email:
  *   patch:
  *     summary: Изменить email пользователя
