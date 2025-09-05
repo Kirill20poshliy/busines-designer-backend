@@ -182,7 +182,7 @@ class AuthController {
 
             res.cookie("refreshToken", refresh.refreshToken, {
                 maxAge: 30 * 24 * 60 * 60 * 1000,
-                httpOnly: true,
+                httpOnly: true, secure: true, sameSite: 'none'
             });
             res.status(200).json({
                 accessToken: refresh.accessToken,
