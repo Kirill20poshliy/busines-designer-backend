@@ -1,6 +1,7 @@
 import { Response, NextFunction } from "express";
 import tokensService from "../services/tokens.service";
-import { IAuthRequest } from "../types/types";
+import { IAuthenticatedSocket, IAuthRequest } from "../types/types";
+import { Socket } from "socket.io";
 
 export const authMiddleware = async (
     req: IAuthRequest,
@@ -30,4 +31,44 @@ export const authMiddleware = async (
     } catch (err) {
         return res.sendStatus(403);
     }
+};
+
+export const socketAuthMiddleware = async (
+    socket: Socket,
+    next: (err?: Error) => void
+) => {
+    try {
+        const token =
+            socket.handshake.auth.token ||
+            extractTokenFromCookie(socket.handshake.headers.cookie);
+
+        if (!token) {
+            return next(new Error("Authentication error: No token provided"));
+        }
+
+        const user = await tokensService.validateAccessToken(token);
+        if (typeof user === "string" || !user.id) {
+            return next(
+                new Error("Authentication error: Invalid token structure")
+            );
+        }
+        (socket as IAuthenticatedSocket).userId = user.id;
+
+        next();
+    } catch (error) {
+        next(new Error("Authentication error: Invalid token"));
+    }
+};
+
+const extractTokenFromCookie = (cookieHeader?: string): string | null => {
+    if (!cookieHeader) return null;
+
+    const cookies = cookieHeader.split(";");
+    for (const cookie of cookies) {
+        const [name, value] = cookie.trim().split("=");
+        if (name === "refreshToken" && value) {
+            return value;
+        }
+    }
+    return null;
 };

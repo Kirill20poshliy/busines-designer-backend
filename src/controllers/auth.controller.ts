@@ -94,8 +94,10 @@ class AuthController {
 
             await tokensService.saveToken(userDto.id, tokens.refreshToken);
 
-            res.cookie('refreshToken', tokens.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: true, sameSite: 'none'})
-            res.cookie('userId', userDto.id, {httpOnly: true, signed: true, secure: true, sameSite: 'none'})
+            res.cookie('refreshToken', tokens.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true})
+            res.cookie('userId', userDto.id, {httpOnly: true, signed: true})
+            // res.cookie('refreshToken', tokens.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: true, sameSite: 'none'})
+            // res.cookie('userId', userDto.id, {httpOnly: true, signed: true, secure: true, sameSite: 'none'})
 
             res.status(200).json({
                 accessToken: tokens.accessToken,

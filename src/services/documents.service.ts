@@ -191,7 +191,7 @@ class DocumentsService {
     async updateName(
         id: string,
         name: string,
-        authorId: string
+        authorId?: string
     ): Promise<{ message: string }> {
         const data = await pool.query(
             `
@@ -200,7 +200,7 @@ class DocumentsService {
                 name = $1, 
                 updated_at = NOW()
             WHERE id = $2
-                AND author_id = $3
+                ${authorId && 'AND author_id = $3'}
             RETURNING *`,
             [name, id, authorId]
         );

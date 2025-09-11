@@ -1,5 +1,6 @@
 import { Request } from "express";
 import { JwtPayload } from "jsonwebtoken";
+import { Socket } from "socket.io";
 
 export interface ITokens {
     accessToken: string,
@@ -9,6 +10,11 @@ export interface ITokens {
 export interface IAuthRequest extends Request {
     userId?: string;
     user?: string | JwtPayload
+}
+
+export interface IAuthenticatedSocket extends Socket {
+    userId: string;
+    joinedDocuments: Set<string>;
 }
 
 export interface IDatabaseSchema {
