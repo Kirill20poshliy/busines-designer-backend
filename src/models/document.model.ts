@@ -23,6 +23,14 @@
  *           type: number
  *         author_name:
  *           type: string
+ *         trigger_type:
+ *           type: string
+ *         category_id:
+ *           type: string
+ *         period:
+ *           type: number
+ *         last_run_date:
+ *           type: string
  *         created_at:
  *           type: string
  *         updated_at:
@@ -39,6 +47,10 @@ export interface IDocument {
     pict_url: string | null;
     author_id: number;
     author_name: string;
+    trigger_type: string;
+    category_id: string;
+    period: number;
+    last_run_date: string;
     created_at: string;
     updated_at: string;
 }

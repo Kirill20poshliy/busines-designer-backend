@@ -275,6 +275,123 @@ docsRouter.patch("/:id/desc", documentsController.updateDesc);
 
 /**
  * @swagger
+ * /api/documents/{id}/trigger:
+ *   patch:
+ *     summary: Изменить тип триггера документа
+ *     tags: [Documents]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID документа
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - trigger_type
+ *             properties:
+ *               trigger_type:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Document data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+docsRouter.patch("/:id/trigger", documentsController.updateTrigger);
+
+/**
+ * @swagger
+ * /api/documents/{id}/category:
+ *   patch:
+ *     summary: Изменить категорию документа
+ *     tags: [Documents]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID документа
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - category_id
+ *             properties:
+ *               category_id:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Document data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+docsRouter.patch("/:id/category", documentsController.updateCategory);
+
+/**
+ * @swagger
+ * /api/documents/{id}/period:
+ *   patch:
+ *     summary: Изменить период выполнения документа
+ *     tags: [Documents]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID документа
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - period
+ *             properties:
+ *               period:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Document data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+docsRouter.patch("/:id/period", documentsController.updatePeriod);
+
+/**
+ * @swagger
  * /api/documents/{id}/picture:
  *   patch:
  *     summary: Изменить изображение документа

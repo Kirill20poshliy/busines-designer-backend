@@ -5,10 +5,20 @@ import documentsService from "../services/documents.service";
 class DocumentsController {
     async create(req: IAuthRequest, res: Response) {
         try {
-            const { name, projectId, desc } = req.body as {
+            const { 
+                name, 
+                projectId, 
+                desc, 
+                trigger_type, 
+                category_id,
+                period
+            } = req.body as {
                 name: string;
                 projectId: string;
                 desc: string;
+                trigger_type: string;
+                category_id: string;
+                period: number;
             };
             const userId = req.userId;
 
@@ -18,7 +28,21 @@ class DocumentsController {
                     .json({ message: "Current user ID are required" });
             }
 
-            const data = await documentsService.create(name, userId, projectId, desc);
+            if (!projectId || !name || !desc || !trigger_type || !category_id) {
+                return res
+                    .status(400)
+                    .json({message: "All props are required!"})
+            }
+
+            const data = await documentsService.create(
+                name, 
+                userId, 
+                projectId, 
+                desc, 
+                trigger_type,
+                category_id,
+                period
+            );
 
             res.status(201).json(data);
         } catch (e) {
@@ -122,6 +146,54 @@ class DocumentsController {
             const { desc } = req.body as { desc: string };
 
             const data = await documentsService.updateDesc(id, desc);
+
+            res.status(200).json(data);
+        } catch (e) {
+            console.log(e);
+            res.status(500).json({
+                message: `Error updating document -> ${e}`,
+            });
+        }
+    }
+
+    async updateTrigger(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+            const { trigger_type } = req.body as { trigger_type: string };
+
+            const data = await documentsService.updateTrigger(id, trigger_type);
+
+            res.status(200).json(data);
+        } catch (e) {
+            console.log(e);
+            res.status(500).json({
+                message: `Error updating document -> ${e}`,
+            });
+        }
+    }
+
+    async updateCategory(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+            const { category_id } = req.body as { category_id: string };
+
+            const data = await documentsService.updateCategory(id, category_id);
+
+            res.status(200).json(data);
+        } catch (e) {
+            console.log(e);
+            res.status(500).json({
+                message: `Error updating document -> ${e}`,
+            });
+        }
+    }
+
+    async updatePeriod(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+            const { period } = req.body as { period: number };
+
+            const data = await documentsService.updatePeriod(id, period);
 
             res.status(200).json(data);
         } catch (e) {

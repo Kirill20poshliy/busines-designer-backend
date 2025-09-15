@@ -11,6 +11,9 @@ class DocumentsService {
         authorId: string,
         projectId: string,
         desc: string,
+        trigger_type: string,
+        category_id: string,
+        period: number,
     ): Promise<{ data: IDocument }> {
         const author = await userService.getOne(authorId);
 
@@ -32,10 +35,33 @@ class DocumentsService {
                 author_id,
                 author_name,
                 project_id,
-                project_name
-            ) VALUES ($1, $2, $3, $4, $5, $6)
+                project_name,
+                category_id,
+                trigger_type,
+                period
+            ) VALUES (
+                $1, 
+                $2, 
+                $3, 
+                $4, 
+                $5, 
+                $6, 
+                $7, 
+                $8,
+                $9
+            )
             RETURNING *`,
-            [name, desc ?? null, authorId, author.data.name, projectId, project.data.name]
+            [
+                name, 
+                desc ?? null, 
+                authorId, 
+                author.data.name, 
+                projectId, 
+                project.data.name,
+                category_id,
+                trigger_type,
+                period ?? null
+            ]
         );
 
         if (!data.rows.length) {
@@ -52,7 +78,7 @@ class DocumentsService {
         field: string = "updated_at",
         order: string = "DESC",
         search: string = ""
-    ): Promise<{pagination: IPagination, data: Omit<IDocument, "content">[] }> {
+    ): Promise<{pagination: IPagination, data: Omit<IDocument, "content" | "category_id"> & {category: string}[] }> {
         const fields = ["name", "created_at", "updated_at"];
         const orders = ["ASC", "DESC"];
     
@@ -67,21 +93,25 @@ class DocumentsService {
             `
             WITH documents_data AS (
                 SELECT
-                    id,
-                    name,
-                    "desc",
-                    project_id,
-                    project_name,
-                    author_id,
-                    author_name,
-                    pict_url,
-                    created_at,
-                    updated_at,
+                    d.id,
+                    d.name,
+                    d."desc",
+                    d.project_id,
+                    d.project_name,
+                    d.author_id,
+                    d.author_name,
+                    tt.name AS trigger_type,
+                    pc.name AS category,
+                    d.pict_url,
+                    d.created_at,
+                    d.updated_at,
                     COUNT(*) OVER() as total_count
-                FROM documents
-                WHERE project_id = $1 
-                    AND name ILIKE $4
-                ORDER BY ${sortField} ${sortOrder}
+                FROM d.documents
+                    LEFT JOIN trigger_types tt ON tt.id = d.trigger_type
+					LEFT JOIN process_categories pc ON pc.id = d.category_id
+                WHERE d.project_id = $1 
+                    AND d.name ILIKE $4
+                ORDER BY d.${sortField} ${sortOrder}
                 LIMIT $2
                 OFFSET $3
             )
@@ -95,6 +125,8 @@ class DocumentsService {
                         'project_name', project_name,
                         'author_id', author_id,
                         'author_name', author_name,
+                        'trigger_type', trigger_type,
+                        'category': category,
                         'pict_url', pict_url,
                         'created_at', created_at,
                         'updated_at', updated_at
@@ -105,23 +137,6 @@ class DocumentsService {
             `,
             [projectId, limit, offset, `%${search}%`]
         );
-        // const data = await pool.query<Omit<IDocument, "content">>(
-        //     `
-        //     SELECT
-        //         id,
-        //         name,
-        //         project_id,
-        //         project_name,
-        //         author_id,
-        //         author_name,
-        //         pict_url,
-        //         created_at,
-        //         updated_at
-        //     FROM documents
-        //     WHERE project_id = $1
-        //     ORDER BY updated_at DESC`,
-        //     [projectId]
-        // );
 
         if (!data) {
             throw new Error("Error while getting documents.");
@@ -160,22 +175,26 @@ class DocumentsService {
          };
     }
 
-    async getOne(id: string): Promise<{ data: IDocument }> {
-        const data = await pool.query<IDocument>(
+    async getOne(id: string): Promise<{ data: Omit<IDocument, "category_id"> & {category: string} }> {
+        const data = await pool.query<Omit<IDocument, "category_id"> & {category: string}>(
             `
             SELECT
-                id,
-                name,
-                "desc",
-                content,
-                project_id,
-                project_name,
-                author_id,
-                author_name,
-                pict_url,
-                created_at,
-                updated_at
-            FROM documents
+                d.id,
+                d.name,
+                d."desc",
+                d.content,
+                d.project_id,
+                d.project_name,
+                d.author_id,
+                d.author_name,
+                tt.name AS trigger_type,
+                pc.name AS category,
+                d.pict_url,
+                d.created_at,
+                d.updated_at
+            FROM documents d
+                LEFT JOIN trigger_types tt ON tt.id = d.trigger_type
+                LEFT JOIN process_categories pc ON pc.id = d.category_id
             WHERE id = $1
             LIMIT 1`,
             [id]
@@ -275,6 +294,63 @@ class DocumentsService {
         }
 
         return { message: "success" };
+    }
+
+    async updateTrigger(id: string, trigger_type: string): Promise<{message: string}> {
+        const data = await pool.query(
+            `
+            UPDATE documents
+            SET 
+                trigger_type = $1,
+                updated_at = NOW()
+            WHERE id = $2
+            RETURNING *`,
+            [trigger_type, id]
+        );
+
+        if (!data.rows.length) {
+            throw new Error(`Error while document "${id}" trigger updating.`);
+        }
+
+        return { message: "success" };        
+    }
+
+    async updateCategory(id: string, category_id: string): Promise<{message: string}> {
+        const data = await pool.query(
+            `
+            UPDATE documents
+            SET 
+                category_id = $1,
+                updated_at = NOW()
+            WHERE id = $2
+            RETURNING *`,
+            [category_id, id]
+        );
+
+        if (!data.rows.length) {
+            throw new Error(`Error while document "${id}" category updating.`);
+        }
+
+        return { message: "success" };     
+    }
+
+    async updatePeriod(id: string, period: number): Promise<{message: string}> {
+        const data = await pool.query(
+            `
+            UPDATE documents
+            SET 
+                period = $1,
+                updated_at = NOW()
+            WHERE id = $2
+            RETURNING *`,
+            [period, id]
+        );
+
+        if (!data.rows.length) {
+            throw new Error(`Error while document "${id}" period updating.`);
+        }
+
+        return { message: "success" }; 
     }
 
     async updatePicture(

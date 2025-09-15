@@ -10,17 +10,17 @@ export const TriggerTypesSchema = `
         IF NOT EXISTS (
             SELECT 1
             FROM trigger_types
-            WHERE name = 'Никогда'
+            WHERE name = 'never'
         ) THEN
-            INSERT INTO trigger_types (name) VALUES ('Никогда');
+            INSERT INTO trigger_types (name) VALUES ('never');
         END IF;
 
         IF NOT EXISTS (
             SELECT 1
             FROM trigger_types
-            WHERE name = 'Периодично'
+            WHERE name = 'periodically'
         ) THEN
-            INSERT INTO trigger_types (name) VALUES ('Периодично');
+            INSERT INTO trigger_types (name) VALUES ('periodically');
         END IF;
     END;
     $$;
