@@ -106,7 +106,7 @@ class DocumentsService {
                     d.created_at,
                     d.updated_at,
                     COUNT(*) OVER() as total_count
-                FROM d.documents
+                FROM documents
                     LEFT JOIN trigger_types tt ON tt.id = d.trigger_type
 					LEFT JOIN process_categories pc ON pc.id = d.category_id
                 WHERE d.project_id = $1 
