@@ -126,7 +126,7 @@ class DocumentsService {
                         'author_id', author_id,
                         'author_name', author_name,
                         'trigger_type', trigger_type,
-                        'category': category,
+                        'category', category,
                         'pict_url', pict_url,
                         'created_at', created_at,
                         'updated_at', updated_at
