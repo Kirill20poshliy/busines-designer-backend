@@ -7,7 +7,7 @@ BEGIN
     ) THEN
         DELETE 
         FROM trigger_types
-        WHERE name = 'Никогда'
+        WHERE name = 'Никогда';
     END IF;
 
     IF NOT EXISTS (
@@ -17,7 +17,7 @@ BEGIN
     ) THEN
         DELETE
         FROM triggr_types
-        WHERE name = 'Периодично'
+        WHERE name = 'Периодично';
     END IF;
 END;
 $$;

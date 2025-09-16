@@ -178,23 +178,23 @@ class DocumentsService {
     async getOne(id: string): Promise<{ data: Omit<IDocument, "category_id"> & {category: string} }> {
         const data = await pool.query<Omit<IDocument, "category_id"> & {category: string}>(
             `
-            SELECT
-                d.id,
-                d.name,
-                d."desc",
-                d.content,
-                d.project_id,
-                d.project_name,
-                d.author_id,
-                d.author_name,
-                tt.name AS trigger_type,
-                pc.name AS category,
-                d.pict_url,
-                d.created_at,
-                d.updated_at
+            SELECT *
+                -- d.id,
+                -- d.name,
+                -- d."desc",
+                -- d.content,
+                -- d.project_id,
+                -- d.project_name,
+                -- d.author_id,
+                -- d.author_name,
+                -- tt.name AS trigger_type,
+                -- pc.name AS category,
+                -- d.pict_url,
+                -- d.created_at,
+                -- d.updated_at
             FROM documents d
-                LEFT JOIN trigger_types tt ON tt.id = d.trigger_type
-                LEFT JOIN process_categories pc ON pc.id = d.category_id
+                -- LEFT JOIN trigger_types tt ON tt.id = d.trigger_type
+                -- LEFT JOIN process_categories pc ON pc.id = d.category_id
             WHERE id = $1
             LIMIT 1`,
             [id]
