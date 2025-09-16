@@ -201,7 +201,7 @@ class DocumentsService {
             FROM documents d
                 LEFT JOIN trigger_types tt ON tt.id = d.trigger_type
                 LEFT JOIN process_categories pc ON pc.id = d.category_id
-            WHERE id = $1
+            WHERE d.id = $1
             LIMIT 1`,
             [id]
         );
