@@ -16,7 +16,7 @@ BEGIN
         WHERE name = 'Периодично'
     ) THEN
         DELETE
-        FROM triggr_types
+        FROM trigger_types
         WHERE name = 'Периодично';
     END IF;
 END;
