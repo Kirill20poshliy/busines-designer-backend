@@ -1,6 +1,7 @@
 import "dotenv";
-import { io } from "socket.io-client";
+import io from "socket.io-client";
 import http from "http";
+import { IDocument } from "./models/document.model";
 
 http.get(`http://localhost:8082/health`, (res) => {
     console.log("✅ HTTP Server status:", res.statusCode);
@@ -22,20 +23,20 @@ setTimeout(() => {
         socket.emit("join-document", "1");
     });
 
-    socket.on("document-content", (data) => {
+    socket.on("document-content", (data: IDocument) => {
         console.log("📨 Received document content:", data);
         socket.emit('document-update', {documentId: '1', content: '{"nodes": []}'})
     });
 
-    socket.on("connect_error", (error) => {
+    socket.on("connect_error", (error: {message: string}) => {
         console.error("❌ Connection error:", error.message);
     });
 
-    socket.on("error", (error) => {
+    socket.on("error", (error: {message: string}) => {
         console.error("❌ Action error:", error.message);
     });
 
-    socket.on("disconnect", (reason) => {
+    socket.on("disconnect", (reason: string) => {
         console.log("🔌 Disconnected:", reason);
     });
 
