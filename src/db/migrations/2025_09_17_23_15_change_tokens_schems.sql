@@ -28,7 +28,7 @@ BEGIN
             AND column_name = 'expires_at'
     ) THEN
         ALTER TABLE tokens
-        ADD COLUMN expires_at TIMESTAMP NOT NULL;
+        ADD COLUMN expires_at TIMESTAMP NOT NULL DEFAULT NOW();
     END IF;
 
     IF NOT EXISTS (

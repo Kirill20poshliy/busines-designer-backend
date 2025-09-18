@@ -5,7 +5,7 @@ export const TokenSchema = `
         token VARCHAR(512) UNIQUE NOT NULL,
         device_info VARCHAR(255),
         ip_address VARCHAR(45),
-        expires_at TIMESTAMP NOT NULL,
+        expires_at TIMESTAMP NOT NULL DEFAULT NOW(),
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW(),
         revoked BOOLEAN DEFAULT false

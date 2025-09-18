@@ -55,7 +55,7 @@
 //     }
 // };
 
-import passport from 'passport';
+// import passport from 'passport';
 import { verifyToken } from '../utils/jwt';
 import { Response, NextFunction } from 'express';
 import userService from '../services/user.service';
@@ -157,4 +157,4 @@ const extractTokenFromAuthHeader = (authHeader?: string): string | null => {
     return authHeader.substring(7);
 };
 
-export default passport;
+// export default passport;
