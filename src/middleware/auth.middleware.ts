@@ -30,7 +30,7 @@ export const authMiddleware = async (
         const result = await userService.getOne(String(payload.userId));
     
         if (result.data === null) {
-            return res.status(401).json({ message: "Unauthorized!" });
+            return res.status(403).json({ message: "Forbidden" });
         }
 
         req.user = result.data;
@@ -38,8 +38,8 @@ export const authMiddleware = async (
         next();
     } catch (err) {
         return res
-            .status(403)
-            .json({ message: "Forbidden: Invalid token" });
+            .status(401)
+            .json({ message: "Unauthorized!" });
     }
 };
 
@@ -98,5 +98,3 @@ const extractTokenFromAuthHeader = (authHeader?: string): string | null => {
     }
     return authHeader.substring(7);
 };
-
-// export default passport;
