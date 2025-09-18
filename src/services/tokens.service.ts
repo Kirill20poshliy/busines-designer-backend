@@ -1,137 +1,5 @@
-// import { pool } from "../db";
-// import { IToken } from "../models/token.model";
-// import { IAuthRequest, ITokens } from "../types/types";
-// import jwt from "jsonwebtoken";
-
-// class TokensService {
-//     accessTokenKey: string;
-//     refreshTokenKey: string;
-
-//     constructor() {
-//         this.accessTokenKey =
-//             process.env.JWT_ACCESSTOKEN_KEY || "jwt-accesstoken-key";
-//         this.refreshTokenKey =
-//             process.env.JWT_REFRESHTOKEN_KEY || "jwt-refreshtoken-key";
-//     }
-
-//     generateTokens(payload: object): ITokens {
-//         const accessToken = jwt.sign(payload, this.accessTokenKey, {
-//             expiresIn: "30m",
-//         });
-//         const refreshToken = jwt.sign(payload, this.refreshTokenKey, {
-//             expiresIn: "30d",
-//         });
-//         return {
-//             accessToken,
-//             refreshToken,
-//         };
-//     }
-
-//     async findToken(refreshToken: string): Promise<IToken> {
-//         const token = await pool.query<IToken>(
-//             `
-//             SELECT *
-//             FROM tokens
-//             WHERE token = $1
-//             LIMIT 1;`,
-//             [refreshToken]
-//         );
-
-//         if (!token) {
-//             throw new Error("Токена не существует.");
-//         }
-
-//         return token.rows[0];
-//     }
-
-//     async saveToken(
-//         userId: string,
-//         refreshToken: string
-//     ): Promise<{ token: string }> {
-//         const isExist = await pool.query<IToken>(
-//             `
-//             SELECT *
-//             FROM tokens
-//             WHERE user_id = $1`,
-//             [userId]
-//         );
-
-//         if (isExist.rows.length !== 0) {
-//             const newToken = await pool.query<IToken>(
-//                 `
-//                 UPDATE tokens
-//                 SET token = $1
-//                 WHERE user_id = $2`,
-//                 [refreshToken, userId]
-//             );
-
-//             if (!newToken) {
-//                 throw new Error("Internal server error.");
-//             }
-
-//             return newToken.rows[0];
-//         } else {
-//             const newToken = await pool.query<IToken>(
-//                 `
-//                 INSERT INTO tokens (
-//                     token,
-//                     user_id                
-//                 )
-//                 VALUES (
-//                     $1,
-//                     $2
-//                 )
-//                 RETURNING token`,
-//                 [refreshToken, userId]
-//             );
-
-//             if (!newToken) throw new Error("Internal server error.");
-
-//             return newToken.rows[0];
-//         }
-//     }
-
-//     async removeToken(refreshToken: string): Promise<{ message: string }> {
-//         const remove = await pool.query<IToken>(
-//             `
-//             DELETE 
-//             FROM tokens 
-//             WHERE token = $1`,
-//             [refreshToken]
-//         );
-
-//         if (!remove) {
-//             throw new Error("Error deleting token");
-//         }
-
-//         return { message: "success" };
-//     }
-
-//     async validateRefreshToken(
-//         refreshToken: string
-//     ): Promise<string | jwt.JwtPayload> {
-//         const isValid = jwt.verify(refreshToken, this.refreshTokenKey);
-//         if (!isValid) {
-//             throw new Error("Invalid token");
-//         }
-//         return isValid;
-//     }
-
-//     async validateAccessToken(
-//         accessToken: string
-//     ): Promise<string | jwt.JwtPayload> {
-//         const isValid = jwt.verify(accessToken, this.accessTokenKey);
-//         if (!isValid) {
-//             throw new Error("Invalid token");
-//         }
-//         return isValid;
-//     }
-// }
-
-// export default new TokensService();
-
 import { pool } from '../db';
-import { generateTokens, verifyToken, JwtPayload } from '../utils/jwt';
+import { generateTokens } from '../utils/jwt';
 
 class TokensService {
     async saveRefreshToken(
@@ -143,17 +11,21 @@ class TokensService {
         const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     
         await pool.query(`
-            INSERT 
-                INTO tokens (
-                    user_id, 
-                    token, 
-                    device_info, 
-                    ip_address, 
-                    expires_at
-                )
-                VALUES ($1, $2, $3, $4, $5)`,
+            INSERT INTO tokens (
+                user_id, 
+                token, 
+                device_info, 
+                ip_address, 
+                expires_at
+            )
+            VALUES ($1, $2, $3, $4, $5)
+            ON CONFLICT (token) 
+            DO UPDATE SET 
+                revoked = false,
+                expires_at = $5,
+                updated_at = NOW()`,
             [
-                userId, 
+                parseInt(userId),
                 token, 
                 deviceInfo, 
                 ipAddress, 
@@ -187,18 +59,20 @@ class TokensService {
     async revokeRefreshToken(token: string): Promise<void> {
         await pool.query(`
             UPDATE tokens 
-            SET revoked = true 
+            SET revoked = true,
+                updated_at = NOW()
             WHERE token = $1`,
             [token]
         );
     }
 
-    async revokeAllUserTokens(userId: number): Promise<void> {
+    async revokeAllUserTokens(userId: string): Promise<void> {
         await pool.query(`
             UPDATE tokens 
-            SET revoked = true 
+            SET revoked = true,
+                updated_at = NOW()
             WHERE user_id = $1`,
-            [userId]
+            [parseInt(userId)]
         );
     }
 
@@ -218,6 +92,21 @@ class TokensService {
     ) {
         const tokens = generateTokens(userId, email);
         await this.saveRefreshToken(userId, tokens.refreshToken, deviceInfo, ipAddress);
+        return tokens;
+    }
+
+    async refreshTokens(
+        oldToken: string,
+        userId: string,
+        email: string,
+        deviceInfo?: string,
+        ipAddress?: string
+    ) {
+        await this.revokeRefreshToken(oldToken);
+        
+        const tokens = generateTokens(userId, email);
+        await this.saveRefreshToken(userId, tokens.refreshToken, deviceInfo, ipAddress);
+        
         return tokens;
     }
 }

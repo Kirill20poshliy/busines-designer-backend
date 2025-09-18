@@ -143,59 +143,6 @@ authRouter.get('/refresh', authController.refresh);
 
 /**
  * @swagger
- * /api/auth/check:
- *   get:
- *     summary: Проверка авторизации
- *     tags: [Authentication]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - refreshToken
- *             properties:
- *               refreshToken:
- *                 type: string
- *     responses:
- *       200:
- *         description: User data
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 accessToken:
- *                   type: string
- *                 refreshToken:
- *                   type: string
- *                 data:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: number
- *                     email:
- *                       type: string
- *                     firstname:
- *                       type: string
- *                     lastname:
- *                       type: string
- *                     name:
- *                       type: string
- *                     pict_ur:
- *                       type: string
- *       400:
- *         description: Bad request
- *       403:
- *         description: Invalid or expired refresh token
- *       500:
- *         description: Internal server error
- */
-authRouter.get('/check', authController.authCheck);
-
-/**
- * @swagger
  * /api/auth/logout:
  *   post:
  *     summary: Выйти

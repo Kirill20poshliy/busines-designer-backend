@@ -4,7 +4,7 @@ import userService from "../services/user.service";
 import bcrypt from "bcryptjs";
 import { UserDto } from "../dtos/user.dto";
 import tokensService from "../services/tokens.service";
-import { verifyToken } from "../utils/jwt";
+import { JwtPayload, verifyToken } from "../utils/jwt";
 import { getDeviceInfo } from "../utils/device";
 
 class AuthController {
@@ -21,11 +21,9 @@ class AuthController {
             const candidate = await userService.getOneByEmail(email);
 
             if (candidate && candidate.data) {
-                return res
-                    .status(409)
-                    .json({
-                        message: `User with email ${email} already exists!`,
-                    });
+                return res.status(409).json({
+                    message: `User with email ${email} already exists!`,
+                });
             }
 
             const hashPass = await bcrypt.hash(password, 3);
@@ -106,10 +104,16 @@ class AuthController {
                 req.ip
             );
 
-            res.cookie('refreshToken', tokens.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true})
-            res.cookie('userId', userDto.id, {httpOnly: true, signed: true})
-            // res.cookie('refreshToken', tokens.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: true, sameSite: 'none'})
-            // res.cookie('userId', userDto.id, {httpOnly: true, signed: true, secure: true, sameSite: 'none'})
+            //DEV
+            // res.cookie("refreshToken", tokens.refreshToken, {
+            //     maxAge: 30 * 24 * 60 * 60 * 1000,
+            //     httpOnly: true,
+            // });
+            // res.cookie("userId", userDto.id, { httpOnly: true, signed: true });
+
+            //PROD
+            res.cookie('refreshToken', tokens.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: true, sameSite: 'none'})
+            res.cookie('userId', userDto.id, {httpOnly: true, signed: true, secure: true, sameSite: 'none'})
 
             res.status(200).json({
                 accessToken: tokens.accessToken,
@@ -127,101 +131,75 @@ class AuthController {
         }
     }
 
-    async authCheck(req: Request, res: Response) {
-        try {
-            const { refreshToken } = req.cookies;
-
-            if (!refreshToken) {
-                return res
-                    .status(401)
-                    .json({
-                        message: "Unauthorized",
-                    });
-            }
-
-            const storedToken = await tokensService.findValidRefreshToken(refreshToken);
-
-            const userId = req.signedCookies["userId"];
-
-            if (!userId || !storedToken) {
-                return res
-                    .status(401)
-                    .json({
-                        message: "Invalid user data",
-                    });
-            }
-
-            const payload = verifyToken(refreshToken, 'refresh');
-
-            await tokensService.revokeRefreshToken(refreshToken);
-
-            const tokens = await tokensService.generateAndSaveTokens(
-                String(payload.userId),
-                payload.email,
-                getDeviceInfo(req),
-                req.ip
-            );
-
-            const userProfile = await userService.getOne(userId);
-
-            if (!userProfile.data) {
-                res.status(404).json({
-                    message: `User ${userId} not found`,
-                });
-                return;
-            }
-
-            res.cookie("refreshToken", tokens.refreshToken, {
-                maxAge: 30 * 24 * 60 * 60 * 1000,
-                httpOnly: true, secure: true, sameSite: 'none'
-            });
-
-            res.status(200).json({
-                accessToken: tokens.accessToken,
-                data: {
-                    ...userProfile.data
-                },
-            });
-        } catch (e) {
-            console.log(e);
-            res.status(500).json({ message: `Auth check error -> ${e}` });
-        }
-    }
-
     async refresh(req: Request, res: Response) {
         try {
             const { refreshToken } = req.cookies;
-            
+
             if (!refreshToken) {
                 return res
                     .status(400)
-                    .json({ message: 'Refresh token is required' });
+                    .json({ message: "Refresh token is required" });
             }
 
-            const storedToken = await tokensService.findValidRefreshToken(refreshToken);
+            let payload: JwtPayload;
+            try {
+                payload = verifyToken(refreshToken, "refresh");
+            } catch (error) {
+                console.log("Token verification failed:", error);
+                res.clearCookie("refreshToken");
+                res.clearCookie("userId");
 
-            if (!storedToken) {
                 return res
                     .status(401)
-                    .json({ message: 'Invalid refresh token' });
+                    .json({ message: "Invalid refresh token" });
             }
 
-            const payload = verifyToken(refreshToken, 'refresh');
+            const storedToken = await tokensService.findValidRefreshToken(
+                refreshToken
+            );
 
-            await tokensService.revokeRefreshToken(refreshToken);
+            if (!storedToken) {
+                console.log("Token not found in DB or revoked/expired");
+                res.clearCookie("refreshToken");
+                res.clearCookie("userId");
 
-            const tokens = await tokensService.generateAndSaveTokens(
+                return res
+                    .status(401)
+                    .json({ message: "Invalid refresh token" });
+            }
+
+            const user = await userService.getOne(String(payload.userId));
+
+            if (!user.data) {
+                console.log("User not found for token:", payload.userId);
+                await tokensService.revokeRefreshToken(refreshToken);
+
+                res.clearCookie("refreshToken");
+                res.clearCookie("userId");
+
+                return res.status(404).json({ message: "User not found" });
+            }
+
+            const tokens = await tokensService.refreshTokens(
+                refreshToken,
                 String(payload.userId),
                 payload.email,
                 getDeviceInfo(req),
                 req.ip
             );
 
-            const user = await userService.getOne(String(payload.userId));
-
             res.cookie("refreshToken", tokens.refreshToken, {
                 maxAge: 30 * 24 * 60 * 60 * 1000,
-                httpOnly: true, secure: true, sameSite: 'none'
+                httpOnly: true,
+                secure: true,
+                sameSite: "none",
+            });
+
+            res.cookie("userId", payload.userId, {
+                httpOnly: true,
+                signed: true,
+                secure: true,
+                sameSite: "none",
             });
 
             res.status(200).json({
@@ -231,7 +209,11 @@ class AuthController {
                 },
             });
         } catch (e) {
-            console.log(e);
+            console.log("Refresh error:", e);
+
+            res.clearCookie("refreshToken");
+            res.clearCookie("userId");
+
             res.status(500).json({ message: `Refresh error -> ${e}` });
         }
     }
@@ -243,14 +225,14 @@ class AuthController {
             if (!refreshToken) {
                 throw new Error("Unauthorized!");
             }
-            
+
             await tokensService.revokeRefreshToken(refreshToken);
 
             res.clearCookie("refreshToken");
 
             res.clearCookie("userId");
 
-            res.json({ message: 'Logged out successfully' });
+            res.json({ message: "Logged out successfully" });
         } catch (e) {
             console.log(e);
             res.status(500).json({
