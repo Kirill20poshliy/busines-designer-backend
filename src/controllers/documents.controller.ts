@@ -28,10 +28,10 @@ class DocumentsController {
                     .json({ message: "Current user ID are required" });
             }
 
-            if (!projectId || !name || !desc || !trigger_type || !category_id) {
+            if (!projectId || !name || !desc || !category_id) {
                 return res
                     .status(400)
-                    .json({message: "All props are required!"})
+                    .json({message: "Props: 'project_id', 'name', 'desc' and 'category_id' are required!"})
             }
 
             const data = await documentsService.create(
