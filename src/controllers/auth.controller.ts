@@ -146,8 +146,8 @@ class AuthController {
                 payload = verifyToken(refreshToken, "refresh");
             } catch (error) {
                 console.log("Token verification failed:", error);
-                res.clearCookie("refreshToken");
-                res.clearCookie("userId");
+                // res.clearCookie("refreshToken");
+                // res.clearCookie("userId");
 
                 return res
                     .status(401)
@@ -160,8 +160,8 @@ class AuthController {
 
             if (!storedToken) {
                 console.log("Token not found in DB or revoked/expired");
-                res.clearCookie("refreshToken");
-                res.clearCookie("userId");
+                // res.clearCookie("refreshToken");
+                // res.clearCookie("userId");
 
                 return res
                     .status(401)
@@ -174,8 +174,8 @@ class AuthController {
                 console.log("User not found for token:", payload.userId);
                 await tokensService.revokeRefreshToken(refreshToken);
 
-                res.clearCookie("refreshToken");
-                res.clearCookie("userId");
+                // res.clearCookie("refreshToken");
+                // res.clearCookie("userId");
 
                 return res.status(404).json({ message: "User not found" });
             }
