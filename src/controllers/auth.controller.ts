@@ -211,8 +211,8 @@ class AuthController {
         } catch (e) {
             console.log("Refresh error:", e);
 
-            res.clearCookie("refreshToken");
-            res.clearCookie("userId");
+            // res.clearCookie("refreshToken");
+            // res.clearCookie("userId");
 
             res.status(500).json({ message: `Refresh error -> ${e}` });
         }
