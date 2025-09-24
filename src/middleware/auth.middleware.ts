@@ -25,7 +25,7 @@ export const authMiddleware = async (
     }
 
     try {
-        const payload = verifyToken(accessToken, 'access');
+        const payload = verifyToken(accessToken, 'refresh');
     
         const result = await userService.getOne(String(payload.userId));
     
