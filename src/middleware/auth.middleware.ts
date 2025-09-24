@@ -25,7 +25,7 @@ export const authMiddleware = async (
     }
 
     try {
-        const payload = verifyToken(accessToken, 'refresh');
+        const payload = verifyToken(accessToken, 'access');
     
         const result = await userService.getOne(String(payload.userId));
     
@@ -57,7 +57,7 @@ export const socketAuthMiddleware = async (
             return next(new Error("Authentication error: No token provided"));
         }
 
-        const payload = verifyToken(token, 'access');
+        const payload = verifyToken(token, 'refresh');
         const result = await userService.getOne(String(payload.userId));
 
         if (result.data === null) {
