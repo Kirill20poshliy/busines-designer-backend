@@ -26,8 +26,8 @@ export class SocketService {
     initialize(server: HttpServer) {
         this.io = new Server(server, {
             cors: {
-                // origin: process.env.FRONTEND_URL || "http://localhost:5173",
-                origin: "*",
+                origin: process.env.FRONTEND_URL || "http://localhost:5173",
+                // origin: "*",
                 methods: ["GET", "POST"],
                 credentials: true,
             },
