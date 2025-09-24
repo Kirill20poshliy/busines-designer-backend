@@ -97,6 +97,19 @@ export class SocketService {
                 }
             );
 
+						authSocket.on(
+                "document-refresh",
+                async (data: Omit<IDocumentUpdate, "userId">) => {
+                    try {
+                        await this.handleDocumentRefresh(authSocket, data);
+                    } catch (error) {
+                        authSocket.emit("error", {
+                            message: "Failed to update document",
+                        });
+                    }
+                }
+            );
+
             authSocket.on(
                 "document-name-update",
                 async (data: { documentId: string; name: string }) => {
@@ -189,6 +202,23 @@ export class SocketService {
         await documentsService.updateContent(documentId, content);
 
         socket.to(documentId).emit("document-update", {
+            documentId,
+            content,
+            userId: socket.userId,
+            timestamp: new Date().toISOString(),
+        });
+
+        this.updateUserActivity(documentId, socket.userId);
+    }
+
+		
+    private async handleDocumentRefresh(
+        socket: IAuthenticatedSocket,
+        data: Omit<IDocumentUpdate, "userId">
+    ) {
+        const { documentId, content } = data;
+
+        socket.to(documentId).emit("document-refresh", {
             documentId,
             content,
             userId: socket.userId,
