@@ -25,12 +25,12 @@ export class SocketService {
 
     initialize(server: HttpServer) {
         this.io = new Server(server, {
-            cors: {
-                origin: process.env.FRONTEND_URL || "http://localhost:5173",
-                // origin: "*",
-                methods: ["GET", "POST"],
-                credentials: true,
-            },
+						cookie: {
+							name: "refreshToken",
+							path: "/",
+							httpOnly: true,
+							sameSite: "none"
+						},
             transports: ['websocket', 'polling'],
             connectionStateRecovery: {
                 maxDisconnectionDuration: 2 * 60 * 1000,
