@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import authService from "../services/auth.service";
 import userService from "../services/user.service";
 import bcrypt from "bcryptjs";
 import { UserDto } from "../dtos/user.dto";
@@ -65,7 +64,15 @@ class AuthController {
 
     async login(req: Request, res: Response) {
         try {
-            const { email, password } = req.body;
+            const { 
+                email, 
+                password, 
+                isMemo 
+            } = req.body as {
+                email: string, 
+                password: string, 
+                isMemo?: boolean
+            };
 
             if (!email || !password) {
                 return res
@@ -104,15 +111,17 @@ class AuthController {
                 req.ip
             );
 
+            const tokenExpiresIn = isMemo ? 30*24*60*60*1000 : 24*60*60*1000
+
             //DEV
             // res.cookie("refreshToken", tokens.refreshToken, {
-            //     maxAge: 30 * 24 * 60 * 60 * 1000,
+            //     maxAge: tokenExpiresIn,
             //     httpOnly: true,
             // });
             // res.cookie("userId", userDto.id, { httpOnly: true, signed: true });
 
             //PROD
-            res.cookie('refreshToken', tokens.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true, secure: true, sameSite: 'none'})
+            res.cookie('refreshToken', tokens.refreshToken, {maxAge: tokenExpiresIn, httpOnly: true, secure: true, sameSite: 'none'})
             res.cookie('userId', userDto.id, {httpOnly: true, signed: true, secure: true, sameSite: 'none'})
 
             res.status(200).json({
