@@ -10,6 +10,7 @@ export const DocumentSchema = `
         FOREIGN KEY (trigger_type) REFERENCES trigger_types(id),
         period BIGINT,
         last_run_date TIMESTAMP,
+        is_started BOOLEAN NOT NULL DEFAULT FALSE,
         project_id INTEGER,
         FOREIGN KEY (project_id) REFERENCES projects(id),
         project_name VARCHAR(100),
