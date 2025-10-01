@@ -3,18 +3,19 @@ import { JwtPayload } from "jsonwebtoken";
 import { Socket } from "socket.io";
 
 export interface ITokens {
-    accessToken: string,
-    refreshToken: string,
+	accessToken: string,
+	refreshToken: string,
 }
 
 export interface IAuthRequest extends Request {
-    userId?: string;
-    user?: string | JwtPayload
+	userId?: string;
+	user?: string | JwtPayload
 }
 
 export interface IAuthenticatedSocket extends Socket {
-    userId: string;
-    joinedDocuments: Set<string>;
+	userId: string;
+	username: string;
+	joinedDocuments: Set<string>;
 }
 
 export interface IDatabaseSchema {
@@ -45,10 +46,10 @@ export interface IDatabaseSchema {
  *         
  */
 export interface IPagination {
-    page: number,
-    limit: number,
-    total: number,
-    total_pages: number,
-    prev: string | null,
-    next: string | null
+	page: number,
+	limit: number,
+	total: number,
+	total_pages: number,
+	prev: string | null,
+	next: string | null
 }

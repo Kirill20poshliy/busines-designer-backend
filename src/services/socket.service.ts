@@ -125,7 +125,7 @@ export class SocketService {
 
             authSocket.on(
                 "cursor-move",
-                (data: { documentId: string; x: number; y: number }) => {
+                (data: { documentId: string; x: number; y: number; }) => {
                     this.handleCursorMove(authSocket, data);
                 }
             );
@@ -160,7 +160,7 @@ export class SocketService {
 
         console.log(`User ${socket.userId} joined document ${documentId}`);
 
-        this.initializeUserPresence(documentId, socket.userId);
+        this.initializeUserPresence(documentId, socket);
 
         try {
             const document = await documentsService.getOne(documentId);
@@ -174,6 +174,7 @@ export class SocketService {
 
             socket.to(documentId).emit("user-joined", {
                 userId: socket.userId,
+								username: socket.username,
                 documentId,
                 presence: this.getUserPresence(documentId, socket.userId),
             });
@@ -255,6 +256,7 @@ export class SocketService {
         socket.to(documentId).emit("user-cursor-move", {
             userId: socket.userId,
             documentId,
+						username: socket.username,
             x,
             y,
             timestamp: new Date().toISOString(),
@@ -291,6 +293,7 @@ export class SocketService {
 
         socket.to(documentId).emit("user-left", {
             userId: socket.userId,
+						username: socket.username,
             documentId,
         });
     }
@@ -309,20 +312,22 @@ export class SocketService {
             this.removeUserPresence(documentId, socket.userId);
             socket.to(documentId).emit("user-left", {
                 userId: socket.userId,
+								username: socket.username,
                 documentId,
                 reason: "disconnected",
             });
         });
     }
 
-    private initializeUserPresence(documentId: string, userId: string) {
+    private initializeUserPresence(documentId: string, socket: IAuthenticatedSocket) {
         if (!this.userPresences.has(documentId)) {
             this.userPresences.set(documentId, new Map());
         }
 
         const documentPresences = this.userPresences.get(documentId)!;
-        documentPresences.set(userId, {
-            userId,
+        documentPresences.set(socket.userId, {
+            userId: socket.userId,
+            username: socket.username,
             lastActivity: new Date(),
             cursorPosition: { x: 0, y: 0 },
         });
@@ -404,6 +409,7 @@ export class SocketService {
                         documentPresences.delete(userId);
                         this.io!.to(documentId).emit("user-left", {
                             userId,
+														username: presence.username,
                             documentId,
                             reason: "inactive",
                         });
