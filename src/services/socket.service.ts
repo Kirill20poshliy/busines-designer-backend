@@ -235,14 +235,16 @@ export class SocketService {
     ) {
         const { documentId, name } = data;
 
-        await documentsService.updateName(documentId, name);
+        await documentsService.updateName(documentId, name, socket.userId);
 
-        this.io!.to(documentId).emit("document-name-updated", {
+				const payload = {
             documentId,
             name,
             userId: socket.userId,
             timestamp: new Date().toISOString(),
-        });
+        }
+
+        socket.to(documentId).emit("document-name-updated", payload);
     }
 
     private handleCursorMove(
