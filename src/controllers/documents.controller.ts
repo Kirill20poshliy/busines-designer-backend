@@ -204,6 +204,32 @@ class DocumentsController {
         }
     }
 
+    async switchShedule(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+
+            const data = await documentsService.switchShedule(id);
+
+            res.status(200).json(data);
+        } catch (e) {
+            console.log(e);
+            res.status(500).json({
+                message: `Error while switching shedule -> ${e}`,
+            });
+        }
+    }
+
+    async executeAgent(_req: Request, res: Response) {
+        try {
+            console.log('executing')
+        } catch (e) {
+            console.log(e);
+            res.status(500).json({
+                message: `Error while executing agent -> ${e}`,
+            });            
+        }
+    }
+
     async updateProject(req: IAuthRequest, res: Response) {
         try {
             const { id } = req.params;

@@ -392,6 +392,62 @@ docsRouter.patch("/:id/period", documentsController.updatePeriod);
 
 /**
  * @swagger
+ * /api/documents/{id}/switch_shedule:
+ *   patch:
+ *     summary: Поставить/снять с расписания агент
+ *     tags: [Documents]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID документа
+ *     responses:
+ *       200:
+ *         description: Document data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+docsRouter.post("/:id/switch_shedule", documentsController.switchShedule);
+
+/**
+ * @swagger
+ * /api/documents/{id}/execute:
+ *   patch:
+ *     summary: Запустить агент
+ *     tags: [Documents]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID документа
+ *     responses:
+ *       200:
+ *         description: Document data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *       404:
+ *         description: Bad request
+ */
+docsRouter.post("/:id/execute", documentsController.executeAgent);
+
+/**
+ * @swagger
  * /api/documents/{id}/picture:
  *   patch:
  *     summary: Изменить изображение документа

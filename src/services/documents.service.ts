@@ -359,6 +359,31 @@ class DocumentsService {
         return { message: "success" }; 
     }
 
+    async switchShedule(id: string): Promise<{is_started: boolean}> {
+        const data = await pool.query<{is_started: boolean}>(`
+            WITH is_agent_started AS (
+                SELECT is_started status
+                FROM documents
+                WHERE id = $1
+                LIMIT 1
+            )
+
+            UPDATE documents
+            SET is_started = NOT (SELECT status FROM is_agent_started)
+            WHERE id = $1
+            RETURNING is_started`,
+            [id]
+        )
+
+        if (!data.rows.length) {
+            throw new Error(
+                `Error while agent "${id}" shedule switching.`
+            );
+        }
+
+        return {is_started: data.rows[0].is_started}
+    }
+
     async updatePicture(
         userId: string,
         objectId: string,
