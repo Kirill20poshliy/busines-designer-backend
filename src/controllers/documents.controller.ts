@@ -191,7 +191,7 @@ class DocumentsController {
     async updatePeriod(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const { period } = req.body as { period: number };
+            const { period } = req.body as { period: number | null };
 
             const data = await documentsService.updatePeriod(id, period);
 

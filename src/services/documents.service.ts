@@ -340,7 +340,7 @@ class DocumentsService {
         return { message: "success" };     
     }
 
-    async updatePeriod(id: string, period: number): Promise<{message: string}> {
+    async updatePeriod(id: string, period: number | null): Promise<{message: string}> {
         const data = await pool.query(
             `
             UPDATE documents
