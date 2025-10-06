@@ -31,11 +31,16 @@
  *           type: number
  *         last_run_date:
  *           type: string
+ *         next_run_date:
+ *           type: string
+ *         is_running:
+ *           type: boolean
+ *         is_started:
+ *           type: boolean
  *         created_at:
  *           type: string
  *         updated_at:
- *           type: string
- *         
+ *           type: string      
  */
 export interface IDocument {
     id: string;
@@ -51,6 +56,9 @@ export interface IDocument {
     category_id: string;
     period: number;
     last_run_date: string;
+    next_run_date:string;
+    is_running: boolean;
+    is_started: boolean;
     created_at: string;
     updated_at: string;
 }
