@@ -104,7 +104,10 @@ class DocumentsService {
                     pc.name AS category,
                     d.period,
                     d.last_run_date,
+                    d.next_run_date,
                     d.pict_url,
+                    d.is_started,
+                    d.is_running,
                     d.created_at,
                     d.updated_at,
                     COUNT(*) OVER() as total_count
@@ -131,6 +134,9 @@ class DocumentsService {
                         'category', category,
                         'period', period,
                         'last_run_date', last_run_date,
+                        'next_run_date', next_run_date,
+                        'is_started', is_started,
+                        'is_running', is_running,
                         'pict_url', pict_url,
                         'created_at', created_at,
                         'updated_at', updated_at
@@ -195,7 +201,10 @@ class DocumentsService {
                 pc.name AS category,
                 d.period,
                 d.last_run_date,
+                d.next_run_date,
                 d.pict_url,
+                d.is_started,
+                d.is_running,
                 d.created_at,
                 d.updated_at
             FROM documents d
