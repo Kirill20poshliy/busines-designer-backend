@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { IAuthRequest } from "../types/types";
 import documentsService from "../services/documents.service";
+import { AgentsManager } from "../agents/agentsManager";
 
 class DocumentsController {
     async create(req: IAuthRequest, res: Response) {
@@ -219,15 +220,31 @@ class DocumentsController {
         }
     }
 
-    async executeAgent(_req: Request, res: Response) {
-        try {
-            console.log('executing')
-        } catch (e) {
-            console.log(e);
-            res.status(500).json({
-                message: `Error while executing agent -> ${e}`,
-            });            
-        }
+    async executeAgent(req: Request, res: Response) {
+        // try {
+        //     const { id } = req.params as {id: string};
+
+        //     const agentsManager = new AgentsManager();
+
+        //     const success = await agentsManager.executeAgent(id);
+
+        //     if (success) {
+        //         res.json({ 
+        //             success: true,
+        //             message: `Агент ${id} успешно выполнен` 
+        //         });
+        //     } else {
+        //         res.status(404).json({ 
+        //             success: false,
+        //             error: `Агент ${id} не найден или не выполнен` 
+        //         });
+        //     }
+        // } catch (e) {
+        //     console.log(e);
+        //     res.status(500).json({
+        //         message: `Error while executing agent -> ${e}`,
+        //     });            
+        // }
     }
 
     async updateProject(req: IAuthRequest, res: Response) {

@@ -53,3 +53,17 @@ export interface IPagination {
 	prev: string | null,
 	next: string | null
 }
+
+export interface IEdge {
+	id: string;
+	source: string;
+	target: string;
+}
+
+export interface INode {
+	id: string;
+	data: {
+		label: string;
+	},
+	type: string;
+}
