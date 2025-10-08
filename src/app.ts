@@ -10,12 +10,15 @@ import cookieParser from "cookie-parser";
 import path from "path";
 import { createServer } from "http";
 import socketService from "./services/socket.service";
+import { AgentsManager } from "./agents/agentsManager";
 
 const app = express();
 const server = createServer(app);
 
 const cookieSecret = process.env.COOKIES_KEY || "cookie-sign";
 const projectRoot = path.resolve(__dirname, "../..");
+
+const agentsManager = new AgentsManager();
 
 app.use(cookieParser(cookieSecret));
 app.use(
@@ -49,6 +52,10 @@ const startServer = async () => {
         const HOST = process.env.HOST || "http://localhost";
         const PORT = process.env.PORT || 8080;
 
+        console.log('🔄 Initializing Agent Manager...');
+        await agentsManager.initialize();
+        console.log('✅ Agent Manager initialized successfully');
+
         server.listen(PORT, () => {
             console.log(`🖥️  Server is running on ${HOST}:${PORT}`);
             console.log(`🕹️  Api aviailable at ${HOST}:${PORT}/api`);
@@ -56,6 +63,12 @@ const startServer = async () => {
                 `📜 Swagger docs available at ${HOST}:${PORT}/api-docs`
             );
             console.log(`🔌 WebSocket available at ${HOST}:${PORT}`);
+            console.log(`🤖 Agent Manager started - monitoring database agents`);
+
+            const agentsStatus = agentsManager.getAgentsStatus();
+            const activeAgents = agentsStatus.filter(a => a.isStarted);
+
+            console.log(`📊 Loaded ${agentsStatus.length} agents, ${activeAgents.length} active`);
         });
     } catch (err) {
         console.error("❌ Failed to start server:", err);
