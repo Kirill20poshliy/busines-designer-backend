@@ -64,6 +64,13 @@ export interface INode {
 	id: string;
 	data: {
 		label: string;
+		url?: string;
+		body?: unknown;
+		abortStatus?: number;
+		continueStatus?: number;
+		email?: string;
+		message?: string;
+		timer?: number;
 	},
 	type: string;
 }
