@@ -1,4 +1,3 @@
-import { Request, Response } from "express";
 import { pool } from "../db";
 import { IProcessCategory } from "../models/processCategory.model";
 

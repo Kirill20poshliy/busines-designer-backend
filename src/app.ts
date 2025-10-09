@@ -18,7 +18,8 @@ const server = createServer(app);
 const cookieSecret = process.env.COOKIES_KEY || "cookie-sign";
 const projectRoot = path.resolve(__dirname, "../..");
 
-const agentsManager = new AgentsManager();
+// const agentsManager = new AgentsManager();
+const agentsManager = AgentsManager.getInstance();
 
 app.use(cookieParser(cookieSecret));
 app.use(
@@ -52,9 +53,9 @@ const startServer = async () => {
         const HOST = process.env.HOST || "http://localhost";
         const PORT = process.env.PORT || 8080;
 
-        console.log('🔄 Initializing Agent Manager...');
+        console.log('🔄 Initializing Agents Manager...');
         await agentsManager.initialize();
-        console.log('✅ Agent Manager initialized successfully');
+        console.log('✅ Agents Manager initialized successfully');
 
         server.listen(PORT, () => {
             console.log(`🖥️  Server is running on ${HOST}:${PORT}`);

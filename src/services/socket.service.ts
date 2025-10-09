@@ -4,12 +4,20 @@ import documentsService from "./documents.service";
 import { socketAuthMiddleware } from "../middleware/auth.middleware";
 import { IAuthenticatedSocket } from "../types/types";
 import { Duplex } from "stream";
+import { AgentsManager } from "../agents/agentsManager";
 
 interface IDocumentUpdate {
     documentId: string;
     content: string;
     userId: string;
 }
+
+interface IAgentStartUpdate {
+    documentId: string;
+    userId: string;
+}
+
+interface IAgentExecuteUpdate extends IAgentStartUpdate {}
 
 interface IUserPresence {
     userId: string;
@@ -97,7 +105,7 @@ export class SocketService {
                 }
             );
 
-						authSocket.on(
+            authSocket.on(
                 "document-refresh",
                 async (data: Omit<IDocumentUpdate, "userId">) => {
                     try {
@@ -136,6 +144,32 @@ export class SocketService {
                     this.handleSelectionChange(authSocket, data);
                 }
             );
+
+            authSocket.on(
+                "shedule-switch",
+                (data: IAgentStartUpdate) => {
+                    try {
+                        this.handleAgentSheduleUpdate(authSocket, data);
+                    } catch (error) {
+                        authSocket.emit("error", {
+                            message: "Failed to switch shedule",
+                        });
+                    }
+                }
+            )
+
+            authSocket.on(
+                "execute-agent",
+                (data: IAgentExecuteUpdate) => {
+                    try {
+                        this.handleAgentExecuteUpdate(authSocket, data);
+                    } catch (error) {
+                        authSocket.emit("error", {
+                            message: "Failed to agent execute",
+                        });
+                    }
+                }
+            )
 
             authSocket.on("ping", () => {
                 authSocket.emit("pong", { timestamp: Date.now() });
@@ -194,6 +228,43 @@ export class SocketService {
         }
     }
 
+    private async handleAgentSheduleUpdate(
+        socket: IAuthenticatedSocket,
+        data: IAgentStartUpdate,
+    ) {
+        const { documentId } = data;
+
+        const startData = await documentsService.switchShedule(documentId);
+
+        socket.to(documentId).emit("agent-shedule-switch", {
+            documentId,
+            isStarted: startData.is_started,
+            userId: socket.userId,
+            timestamp: new Date().toISOString(),
+        })
+
+        this.updateUserActivity(documentId, socket.userId);
+    }
+
+    private async handleAgentExecuteUpdate(
+        socket: IAuthenticatedSocket,
+        data: IAgentStartUpdate,
+    ) {
+        const { documentId } = data;
+
+        const agentsManager = AgentsManager.getInstance();
+        const success = await agentsManager.executeAgent(documentId);
+
+        socket.to(documentId).emit("execute-agent", {
+            documentId,
+            success,
+            userId: socket.userId,
+            timestamp: new Date().toISOString(),
+        })
+
+        this.updateUserActivity(documentId, socket.userId);
+    }
+
     private async handleDocumentUpdate(
         socket: IAuthenticatedSocket,
         data: Omit<IDocumentUpdate, "userId">
@@ -237,7 +308,7 @@ export class SocketService {
 
         await documentsService.updateName(documentId, name, socket.userId);
 
-				const payload = {
+        const payload = {
             documentId,
             name,
             userId: socket.userId,
@@ -258,7 +329,7 @@ export class SocketService {
         socket.to(documentId).emit("user-cursor-move", {
             userId: socket.userId,
             documentId,
-						username: socket.username,
+            username: socket.username,
             x,
             y,
             timestamp: new Date().toISOString(),
@@ -295,7 +366,7 @@ export class SocketService {
 
         socket.to(documentId).emit("user-left", {
             userId: socket.userId,
-						username: socket.username,
+            username: socket.username,
             documentId,
         });
     }
@@ -314,7 +385,7 @@ export class SocketService {
             this.removeUserPresence(documentId, socket.userId);
             socket.to(documentId).emit("user-left", {
                 userId: socket.userId,
-								username: socket.username,
+                username: socket.username,
                 documentId,
                 reason: "disconnected",
             });

@@ -221,30 +221,30 @@ class DocumentsController {
     }
 
     async executeAgent(req: Request, res: Response) {
-        // try {
-        //     const { id } = req.params as {id: string};
+        try {
+            const { id } = req.params as {id: string};
 
-        //     const agentsManager = new AgentsManager();
+            const agentsManager = AgentsManager.getInstance();
 
-        //     const success = await agentsManager.executeAgent(id);
+            const success = await agentsManager.executeAgent(id);
 
-        //     if (success) {
-        //         res.json({ 
-        //             success: true,
-        //             message: `Агент ${id} успешно выполнен` 
-        //         });
-        //     } else {
-        //         res.status(404).json({ 
-        //             success: false,
-        //             error: `Агент ${id} не найден или не выполнен` 
-        //         });
-        //     }
-        // } catch (e) {
-        //     console.log(e);
-        //     res.status(500).json({
-        //         message: `Error while executing agent -> ${e}`,
-        //     });            
-        // }
+            if (success) {
+                res.json({ 
+                    success: true,
+                    message: `Агент ${id} успешно выполнен!` 
+                });
+            } else {
+                res.status(404).json({ 
+                    success: false,
+                    error: `Агент ${id} не найден или не выполнен.` 
+                });
+            }
+        } catch (e) {
+            console.log(e);
+            res.status(500).json({
+                message: `Error while executing agent -> ${e}`,
+            });            
+        }
     }
 
     async updateProject(req: IAuthRequest, res: Response) {
