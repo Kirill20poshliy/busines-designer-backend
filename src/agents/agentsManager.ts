@@ -4,9 +4,18 @@ import documentsService from "../services/documents.service";
 import { Agent } from "./agent";
 
 export class AgentsManager {
+    private static instance: AgentsManager;
     private agents: Map<string, Agent> = new Map();
     private pollingInterval?: NodeJS.Timeout;
     private checkInterval?: NodeJS.Timeout;
+
+    public static getInstance(): AgentsManager {
+        if (!AgentsManager.instance) {
+            AgentsManager.instance = new AgentsManager();
+        }
+
+        return AgentsManager.instance;
+    }
 
     public async initialize(): Promise<void> {        
         await this.loadAgents();
