@@ -28,7 +28,6 @@ function getOrderedUniqueNodes(edges: IEdge[]): string[] {
 export const parseDocumentContent = (content: string) => {
     try {
         const contentObj = JSON.parse(content);
-        console.log(contentObj);
 
         const edges = contentObj.edges as IEdge[];
         const nodes = contentObj.nodes as INode[];

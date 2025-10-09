@@ -5,16 +5,15 @@ const resend = new Resend(process.env.RESEND_KEY);
 export const sendAgentEmail = async (
     email: string, 
     text: string, 
-    agentName?: string
+    // agentName?: string
 ): Promise<{success: boolean, error: string | undefined}> => {
     try {
         const { error } = await resend.emails.send({
             from: 'onboarding@resend.dev',
             to: [email],
-            subject: 'На связи Business Designer!',
+            subject: 'Агент Business Designer завершил работу!',
             html: `
                 <div>
-                    <h1>Агент ${agentName ? agentName + " " : ""}завершил свою работу.</h1>
                     <p>${text}</p>
                 </div>
             `,

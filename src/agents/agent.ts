@@ -1,4 +1,7 @@
 import { IDocument } from '../models/document.model';
+import apiQuery from '../utils/apiQuery';
+import { parseDocumentContent } from '../utils/parseDocumentContent';
+import { sendAgentEmail } from '../utils/sendEmail';
 
 export class Agent {
     constructor(
@@ -46,12 +49,76 @@ export class Agent {
         success: boolean, 
         error: string | undefined
     }> {
-        if (content) {
-            console.log('Agent processing...')
-        }
-        return {
-            success: true,
-            error: undefined
+        try {
+            if(!content) {
+                throw new Error('Агент не может быть пустым');
+            }
+            
+            const nodesData = parseDocumentContent(content);
+
+            for (let node of nodesData) {
+                const nodeType = node.type
+                const data = node.data
+
+                switch (nodeType) {
+                    case 'request':
+                        const url = data.url;
+                        if (!url) {
+                            throw new Error('Обязательное поле "url" в запросе не заполнено!');
+                        }
+
+                        console.log(`Sending request to: "${url}"...`);
+
+                        const body = data.body;
+
+                        const result = body ? await apiQuery.post(url, body) : await apiQuery.get(url);
+
+                        if (result.status == (data.continueStatus ?? 200)) {
+                            break;
+                        }
+                        if (result.status == (data.abortStatus ?? 500)) {
+                            throw new Error(`Запрос завершён со статусом: ${result.status}`);
+                        }
+                    case 'condition':
+                        const email = data.email;
+                        if (!email) {
+                            throw new Error('Обязательное поле "email" в блоке "Письмо" не заполнено!');
+                        }
+
+                        console.log(`Sending email to: ${email}...`);
+
+                        const message = data.message
+
+                        const emailResult = await sendAgentEmail(email, message ?? '');
+
+                        if (emailResult.success) {
+                            break;
+                        } else {
+                            throw new Error(emailResult.error);
+                        }
+                    case 'middle-process':
+                        const timer = data.timer;
+                        if (!timer) {
+                            break;
+                        }
+
+                        console.log(`Waiting for ${timer/1000} sec...`);
+                        await new Promise(resolve => setTimeout(resolve, timer));
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return {
+                success: true,
+                error: undefined
+            }
+        } catch (e) {
+            return {
+                success: false,
+                error: (e as Error).message
+            }            
         }
     }
 }
