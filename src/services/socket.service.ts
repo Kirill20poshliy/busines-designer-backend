@@ -253,7 +253,7 @@ export class SocketService {
         const { documentId } = data;
 
         const agentsManager = AgentsManager.getInstance();
-        const success = await agentsManager.executeAgent(documentId);
+        const success = await agentsManager.executeAgent(documentId, true);
 
         socket.to(documentId).emit("execute-agent", {
             documentId,

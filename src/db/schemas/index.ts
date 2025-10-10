@@ -1,4 +1,5 @@
 import { IDatabaseSchema } from "../../types/types";
+import { AgentLogSchema, AgentLogSchemaDrop } from "./agentLogs.schema";
 import { DocumentSchema, DocumentSchemaDrop } from "./documents.schema";
 import { FileSchema, FileSchemaDrop } from "./files.schema";
 import {
@@ -26,4 +27,5 @@ export const schemas: IDatabaseSchema[] = [
     },
     { name: "documents", create: DocumentSchema, drop: DocumentSchemaDrop },
     { name: "files", create: FileSchema, drop: FileSchemaDrop },
+    { name: "agents_logs", create: AgentLogSchema, drop: AgentLogSchemaDrop },
 ];

@@ -11,10 +11,38 @@ class AgentsDBService {
             )
 
             SELECT 
-                d.*
+                CAST(d.id AS TEXT),
+                d.name,
+                d.is_started,
+                d.period,
+                d.content,
+                d.last_run_date,
+                d.next_run_date
             FROM documents d
                 JOIN agent_category ac ON ac.id = d.category_id
             WHERE is_started = true`
+        )
+        return agents.rows
+    }
+
+    async getAllAgents(): Promise<IDocument[]> {
+        const agents = await pool.query<IDocument>(`
+            WITH agent_category AS (
+                SELECT id
+                FROM process_categories
+                WHERE name = 'agent'
+            )
+
+            SELECT 
+                CAST(d.id AS TEXT),
+                d.name,
+                d.is_started,
+                d.period,
+                d.content,
+                d.last_run_date,
+                d.next_run_date
+            FROM documents d
+                JOIN agent_category ac ON ac.id = d.category_id`
         )
         return agents.rows
     }

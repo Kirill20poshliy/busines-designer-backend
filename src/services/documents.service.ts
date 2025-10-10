@@ -1,4 +1,5 @@
 import { pool } from "../db";
+import { IAgentLog } from "../models/agentLog.model";
 import { IDocument } from "../models/document.model";
 import { IPagination } from "../types/types";
 import filesService from "./files.service";
@@ -470,6 +471,58 @@ class DocumentsService {
         }
 
         return { message: "success" };
+    }
+
+    async createAgentLog(agentId: string, text: string): Promise<{message: string}> {
+        const createData = await pool.query(`
+            INSERT 
+            INTO agents_logs (
+                agent_id,
+                log_text
+            )
+            VALUES (
+                $1,
+                $2
+            )
+            RETURNING *`,
+            [agentId, text]
+        );
+        
+        if (!createData.rows.length) {
+            return {
+                message: 'failed'
+            }
+        }
+
+        return {
+            message: 'success'
+        }
+    }
+
+    async getAgentLogs(id: string): Promise<IAgentLog[]> {
+        const logs = await pool.query(`
+            SELECT *
+            FROM agents_logs
+            WHERE agent_id = $1`,
+            [id]
+        )
+
+        return logs.rows
+    }
+
+    async deleteAgentLogs(id: string): Promise<{message: string}> {
+        const logsDelete = await pool.query(`
+            DELETE FROM agents_logs
+            WHERE agent_id = $1
+            RETURNING *`,
+            [id]
+        )
+
+        if (!logsDelete.rows.length) {
+            throw new Error(`Error while agent ${id} logs deleteing`);
+        }
+
+        return {message: 'success'};
     }
 }
 
