@@ -1,5 +1,6 @@
 import { IDocument } from '../models/document.model';
 import apiQuery from '../utils/apiQuery';
+import { convertMilliseconds } from '../utils/convertMilliseconds';
 import { parseDocumentContent } from '../utils/parseDocumentContent';
 import { sendAgentEmail } from '../utils/sendEmail';
 
@@ -80,14 +81,14 @@ export class Agent {
                             throw new Error(`Запрос завершён со статусом: ${result.status}`);
                         }
                     case 'condition':
-                        const email = data.email;
+                        const email = data.to;
                         if (!email) {
                             throw new Error('Обязательное поле "email" в блоке "Письмо" не заполнено!');
                         }
 
                         console.log(`Sending email to: ${email}...`);
 
-                        const message = data.message
+                        const message = data.text
 
                         const emailResult = await sendAgentEmail(email, message ?? '');
 
@@ -97,13 +98,17 @@ export class Agent {
                             throw new Error(emailResult.error);
                         }
                     case 'middle-process':
-                        const timer = data.timer;
+                        const timer = Number(data.value);
                         if (!timer) {
                             break;
                         }
 
-                        console.log(`Waiting for ${timer/1000} sec...`);
-                        await new Promise(resolve => setTimeout(resolve, timer));
+                        const timeType = data.type;
+
+                        const delay = convertMilliseconds(timer, timeType)
+
+                        console.log(`Waiting for ${delay/1000} sec...`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
                         break;
                     default:
                         break;
