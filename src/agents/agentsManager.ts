@@ -2,6 +2,7 @@ import { IDocument } from "../models/document.model";
 import agentsDBService from "../services/agentsDB.service";
 import documentsService from "../services/documents.service";
 import { Agent } from "./agent";
+import dayjs from 'dayjs';
 
 export class AgentsManager {
     private static instance: AgentsManager;
@@ -77,7 +78,9 @@ export class AgentsManager {
                 new Date(status.nextExecution) <= now;
       
             if (shouldExecute) {
-                console.log(`⏰ Scheduler: executing agent ${agent.name}`);
+                console.log(
+                    `[${dayjs(Date()).format('DD.MM.YY HH.mm.ss')}] ⏰ Scheduler: executing agent ${agent.name}`
+                );
                 await this.executeAgentImmediately(agent.id);
             }
         }

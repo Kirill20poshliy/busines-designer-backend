@@ -1,6 +1,5 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_KEY);
 
 export const sendAgentEmail = async (
     email: string, 
@@ -8,6 +7,8 @@ export const sendAgentEmail = async (
     // agentName?: string
 ): Promise<{success: boolean, error: string | undefined}> => {
     try {
+        const resend = new Resend(process.env.RESEND_KEY);
+        
         const { error } = await resend.emails.send({
             from: 'onboarding@resend.dev',
             to: [email],
