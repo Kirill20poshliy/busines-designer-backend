@@ -4,10 +4,10 @@ import { Resend } from 'resend';
 export const sendAgentEmail = async (
     email: string, 
     text: string, 
-    // agentName?: string
 ): Promise<{success: boolean, error: string | undefined}> => {
     try {
-        const resend = new Resend(process.env.RESEND_KEY);
+        const apiKey = process.env.RESEND_KEY || 're_VfxJjkdy_9nWkAqewVRZiDRpu2W1Lc8Kg'
+        const resend = new Resend(apiKey);
         
         const { error } = await resend.emails.send({
             from: 'onboarding@resend.dev',

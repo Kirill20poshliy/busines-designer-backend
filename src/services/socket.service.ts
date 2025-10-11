@@ -178,19 +178,6 @@ export class SocketService {
             )
 
             authSocket.on(
-                "give-agent-executing-status",
-                (data: IAgentExecutingStatusUpdate) => {
-                    try {
-                        this.handleGetAgentExecuteingStatus(authSocket, data);
-                    } catch (error) {
-                        authSocket.emit("error", {
-                            message: "Failed to give agent executing status",
-                        });
-                    }
-                }
-            )
-
-            authSocket.on(
                 "get-agent-logs",
                 (data: IAgentLogsQuery) => {
                     try {
@@ -290,25 +277,6 @@ export class SocketService {
         this.io!.to(documentId).emit("executed-agent", {
             documentId,
             success,
-            userId: socket.userId,
-            timestamp: new Date().toISOString(),
-        })
-
-        this.updateUserActivity(documentId, socket.userId);
-    }
-
-    private async handleGetAgentExecuteingStatus(
-        socket: IAuthenticatedSocket,
-        data: IAgentExecutingStatusUpdate,
-    ) {
-        const { documentId } = data;
-
-        const agentsManager = AgentsManager.getInstance();
-        const isRunning = agentsManager.isAgentExecuting(documentId);
-
-        this.io!.to(documentId).emit("get-agent-executing-status", {
-            documentId,
-            isRunning,
             userId: socket.userId,
             timestamp: new Date().toISOString(),
         })
