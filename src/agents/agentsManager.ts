@@ -87,18 +87,42 @@ export class AgentsManager {
         }
     }
 
-    private async executeAgentImmediately(agentId: string, oneTime?: boolean): Promise<void> {
+    private async executeAgentImmediately(agentId: string, oneTime?: boolean): Promise<boolean> {
         const agent = this.agents.get(agentId);
-        if (!agent || agent.status.isRunning) {
-            return;
-        }
-
-        const record = await documentsService.getOne(agentId);
-        if (!record) {
-            return;
+        if (!agent) {
+            return false;
         }
 
         try {
+            if (agent.status.isRunning) {
+                const runningLog = `[${formatDate(Date())}] --------⛔ Agent ${agent.name} failed. --------\n Agent already executing!`
+                const dbRunningLog = await documentsService.createAgentLog(agentId, runningLog);
+                if (dbRunningLog) {
+                    socketService.getIO().to(agentId).emit("new-agent-log", {
+                        documentId: agentId,
+                        log: { id: dbRunningLog.id, log_text: dbRunningLog.log_text },
+                        timestamp: new Date().toISOString(),
+                    });
+                }
+    
+                return false;
+            }
+    
+            const record = await documentsService.getOne(agentId);
+            if (!record) {
+                const notFoundLog = `[${formatDate(Date())}] --------⛔ Agent ${agent.name} failed. --------\n Agent not found in database!`
+                const dbNotFoundLog = await documentsService.createAgentLog(agentId, notFoundLog);
+                if (dbNotFoundLog) {
+                    socketService.getIO().to(agentId).emit("new-agent-log", {
+                        documentId: agentId,
+                        log: { id: dbNotFoundLog.id, log_text: dbNotFoundLog.log_text },
+                        timestamp: new Date().toISOString(),
+                    });
+                }
+    
+                return false;
+            }
+
             await agentsDBService.run(agentId);
 
             socketService.getIO().to(agentId).emit("get-agent-executing-status", {
@@ -153,9 +177,11 @@ export class AgentsManager {
             if (updatedRecord) {
                 agent.updateRecord(updatedRecord);
             }
-
+            
+            return result.success
         } catch (error) {
             console.error(`Unexpected error in agent ${agent.name}:`, error);
+            return false
         } finally {
             await agentsDBService.stop(agentId);
             socketService.getIO().to(agentId).emit("get-agent-executing-status", {
