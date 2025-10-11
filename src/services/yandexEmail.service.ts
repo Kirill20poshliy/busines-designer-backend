@@ -8,8 +8,8 @@ export class YandexEmailService {
     constructor() {
         this.transporter = nodemailer.createTransport({
             host: 'smtp.yandex.ru',
-            port: 587,
-            secure: false,
+            port: 465,
+            secure: true,
             tls: {
                 servername: 'smtp.yandex.ru'
             },
