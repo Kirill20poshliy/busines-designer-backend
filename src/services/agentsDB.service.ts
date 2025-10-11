@@ -37,6 +37,7 @@ class AgentsDBService {
                 CAST(d.id AS TEXT),
                 d.name,
                 d.is_started,
+                d.is_running,
                 d.period,
                 d.content,
                 d.last_run_date,

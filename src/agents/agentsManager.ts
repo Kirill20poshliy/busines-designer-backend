@@ -207,6 +207,10 @@ export class AgentsManager {
         return Array.from(this.agents.values()).map(agent => agent.status);
     }
 
+    public isAgentExecuting(id: string) {
+        return !!this.agents.get(id)?.status.isRunning
+    }
+
     public getAgent(id: string) {
         return this.agents.get(id);
     }
