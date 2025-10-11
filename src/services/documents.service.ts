@@ -503,7 +503,10 @@ class DocumentsService {
         const logs = await pool.query(`
             SELECT *
             FROM agents_logs
-            WHERE agent_id = $1`,
+            WHERE agent_id = $1
+                AND created_at >= NOW() - INTERVAL '7 days'
+                AND created_at <= NOW()
+            ORDER BY created_at`,
             [id]
         )
 
