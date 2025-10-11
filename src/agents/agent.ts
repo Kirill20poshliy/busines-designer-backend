@@ -1,11 +1,12 @@
 import { IDocument } from '../models/document.model';
 import documentsService from '../services/documents.service';
 import socketService from '../services/socket.service';
+import { yandexEmailService } from '../services/yandexEmail.service';
 import apiQuery from '../utils/apiQuery';
 import { convertMilliseconds } from '../utils/convertMilliseconds';
 import { formatDate } from '../utils/date';
 import { parseDocumentContent } from '../utils/parseDocumentContent';
-import { sendAgentEmail } from '../utils/sendEmail';
+// import { sendAgentEmail } from '../utils/sendEmail';
 
 export class Agent {
     constructor(
@@ -60,7 +61,8 @@ export class Agent {
             }
             
             const nodesData = parseDocumentContent(content);
-            const agentId = this.id
+            const agentId = this.id;
+            const agentName = this.name;
 
             for (let node of nodesData) {
                 const nodeType = node.type
@@ -113,7 +115,12 @@ export class Agent {
 
                         const message = data.text
 
-                        const emailResult = await sendAgentEmail(email, message ?? '');
+                        // const emailResult = await sendAgentEmail(email, message ?? '');
+                        const emailResult = await yandexEmailService.sendAgentEmail(
+                            agentName, 
+                            email, 
+                            message ?? ''
+                        );
 
                         if (emailResult.success) {
                             break;

@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-
+import 'dotenv';
 
 export const sendAgentEmail = async (
     email: string, 
