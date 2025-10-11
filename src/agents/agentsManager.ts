@@ -1,6 +1,7 @@
 import { IDocument } from "../models/document.model";
 import agentsDBService from "../services/agentsDB.service";
 import documentsService from "../services/documents.service";
+import socketService from "../services/socket.service";
 import { formatDate } from "../utils/date";
 import { Agent } from "./agent";
 
@@ -100,19 +101,40 @@ export class AgentsManager {
         try {
             await agentsDBService.run(agentId);
             const startLog = `[${formatDate(Date())}] --------⚙️  Executing agent ${agent.name} --------`;
-            await documentsService.createAgentLog(agentId, startLog);
-            console.log(startLog);
+            const dbStartLog = await documentsService.createAgentLog(agentId, startLog);
+
+            if (dbStartLog) {
+                socketService.getIO().to(agentId).emit("new-agent-log", {
+                    documentId: agentId,
+                    log: { id: dbStartLog.id, log_text: dbStartLog.log_text },
+                    timestamp: new Date().toISOString(),
+                });
+            }
       
             const result = await agent.processContent();
       
             if (result.success) {
                 const successLog = `[${formatDate(Date())}] --------✅ Agent ${agent.name} executed successfully --------`;
-                await documentsService.createAgentLog(agentId, successLog);
-                console.log(successLog);
+                const dbSuccessLog = await documentsService.createAgentLog(agentId, successLog);
+
+                if (dbSuccessLog) {
+                    socketService.getIO().to(agentId).emit("new-agent-log", {
+                        documentId: agentId,
+                        log: { id: dbSuccessLog.id, log_text: dbSuccessLog.log_text },
+                        timestamp: new Date().toISOString(),
+                    });
+                }
             } else {
                 const errorLog = `[${formatDate(Date())}] --------⛔ Agent ${agent.name} failed. --------\n${result.error}`;
-                await documentsService.createAgentLog(agentId, errorLog);
-                console.error(errorLog);
+                const dbErrorLog = await documentsService.createAgentLog(agentId, errorLog);
+
+                if (dbErrorLog) {
+                    socketService.getIO().to(agentId).emit("new-agent-log", {
+                        documentId: agentId,
+                        log: { id: dbErrorLog.id, log_text: dbErrorLog.log_text },
+                        timestamp: new Date().toISOString(),
+                    });
+                }
             }
 
             if (!oneTime) {
