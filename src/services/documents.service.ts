@@ -473,7 +473,7 @@ class DocumentsService {
         return { message: "success" };
     }
 
-    async createAgentLog(agentId: string, text: string): Promise<{message: string}> {
+    async createAgentLog(agentId: string, text: string): Promise<IAgentLog | null> {
         const createData = await pool.query(`
             INSERT 
             INTO agents_logs (
@@ -487,16 +487,12 @@ class DocumentsService {
             RETURNING *`,
             [agentId, text]
         );
-        
+
         if (!createData.rows.length) {
-            return {
-                message: 'failed'
-            }
+
         }
 
-        return {
-            message: 'success'
-        }
+        return createData.rows[0] ?? null
     }
 
     async getAgentLogs(id: string): Promise<IAgentLog[]> {

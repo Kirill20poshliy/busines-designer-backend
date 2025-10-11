@@ -1,5 +1,6 @@
 import { IDocument } from '../models/document.model';
 import documentsService from '../services/documents.service';
+import socketService from '../services/socket.service';
 import apiQuery from '../utils/apiQuery';
 import { convertMilliseconds } from '../utils/convertMilliseconds';
 import { formatDate } from '../utils/date';
@@ -73,8 +74,15 @@ export class Agent {
                         }
 
                         const requestLog = `[${formatDate(Date())}]: Sending request to: "${url}"...`;
-                        await documentsService.createAgentLog(agentId, requestLog);
-                        console.log(requestLog);
+                        const dbRequestLog = await documentsService.createAgentLog(agentId, requestLog);
+                        
+                        if (dbRequestLog) {
+                            socketService.getIO().to(agentId).emit("new-agent-log", {
+                                documentId: agentId,
+                                log: { id: dbRequestLog.id, log_text: dbRequestLog.log_text },
+                                timestamp: new Date().toISOString(),
+                            });
+                        }
 
                         const body = data.body;
 
@@ -93,8 +101,15 @@ export class Agent {
                         }
 
                         const emailLog = `[${formatDate(Date())}]: Sending email to: ${email}...`;
-                        await documentsService.createAgentLog(agentId, emailLog)
-                        console.log(emailLog);
+                        const dbEmailLog = await documentsService.createAgentLog(agentId, emailLog)
+
+                        if (dbEmailLog) {
+                            socketService.getIO().to(agentId).emit("new-agent-log", {
+                                documentId: agentId,
+                                log: { id: dbEmailLog.id, log_text: dbEmailLog.log_text },
+                                timestamp: new Date().toISOString(),
+                            });                            
+                        }
 
                         const message = data.text
 
@@ -116,8 +131,15 @@ export class Agent {
                         const delay = convertMilliseconds(timer, timeType)
 
                         const delayLog = `[${formatDate(Date())}]: Waiting for ${delay/1000} sec...`
-                        await documentsService.createAgentLog(agentId, delayLog);
-                        console.log(delayLog);
+                        const dbDelayLog = await documentsService.createAgentLog(agentId, delayLog);
+                        
+                        if (dbDelayLog) {
+                            socketService.getIO().to(agentId).emit("new-agent-log", {
+                                documentId: agentId,
+                                log: { id: dbDelayLog.id, log_text: dbDelayLog.log_text },
+                                timestamp: new Date().toISOString(),
+                            });                              
+                        }
 
                         await new Promise(resolve => setTimeout(resolve, delay));
                         break;
