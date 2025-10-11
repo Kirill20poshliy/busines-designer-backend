@@ -100,6 +100,13 @@ export class AgentsManager {
 
         try {
             await agentsDBService.run(agentId);
+
+            socketService.getIO().to(agentId).emit("get-agent-executing-status", {
+                documentId: agentId,
+                isRunning: true,
+                timestamp: new Date().toISOString(),
+            });
+
             const startLog = `[${formatDate(Date())}] --------⚙️  Executing agent ${agent.name} --------`;
             const dbStartLog = await documentsService.createAgentLog(agentId, startLog);
 
@@ -151,6 +158,11 @@ export class AgentsManager {
             console.error(`Unexpected error in agent ${agent.name}:`, error);
         } finally {
             await agentsDBService.stop(agentId);
+            socketService.getIO().to(agentId).emit("get-agent-executing-status", {
+                documentId: agentId,
+                isRunning: false,
+                timestamp: new Date().toISOString(),
+            });
         }
     }
 
