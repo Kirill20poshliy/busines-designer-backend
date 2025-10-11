@@ -12,12 +12,18 @@ interface IDocumentUpdate {
     userId: string;
 }
 
-interface IAgentStartUpdate {
+interface IBaseDocumentQuery {
     documentId: string;
     userId: string;
 }
 
-interface IAgentExecuteUpdate extends IAgentStartUpdate {}
+interface IAgentStartUpdate extends IBaseDocumentQuery {}
+
+interface IAgentExecuteUpdate extends IBaseDocumentQuery {}
+
+interface IAgentLogsQuery extends IBaseDocumentQuery {}
+
+interface IAgentExecutingStatusUpdate extends IBaseDocumentQuery {}
 
 interface IUserPresence {
     userId: string;
@@ -171,6 +177,32 @@ export class SocketService {
                 }
             )
 
+            authSocket.on(
+                "give-agent-executing-status",
+                (data: IAgentExecutingStatusUpdate) => {
+                    try {
+                        this.handleGetAgentExecuteingStatus(authSocket, data);
+                    } catch (error) {
+                        authSocket.emit("error", {
+                            message: "Failed to give agent executing status",
+                        });
+                    }
+                }
+            )
+
+            authSocket.on(
+                "get-agent-logs",
+                (data: IAgentLogsQuery) => {
+                    try {
+                        this.handleGetAgentLogs(authSocket, data);
+                    } catch (error) {
+                        authSocket.emit("error", {
+                            message: "Failed to get agent logs",
+                        });
+                    }
+                }
+            )
+
             authSocket.on("ping", () => {
                 authSocket.emit("pong", { timestamp: Date.now() });
             });
@@ -208,7 +240,7 @@ export class SocketService {
 
             socket.to(documentId).emit("user-joined", {
                 userId: socket.userId,
-								username: socket.username,
+                username: socket.username,
                 documentId,
                 presence: this.getUserPresence(documentId, socket.userId),
             });
@@ -236,7 +268,7 @@ export class SocketService {
 
         const startData = await documentsService.switchShedule(documentId);
 
-        socket.to(documentId).emit("agent-shedule-switch", {
+        this.io!.to(documentId).emit("agent-shedule-switch", {
             documentId,
             isStarted: startData.is_started,
             userId: socket.userId,
@@ -248,14 +280,14 @@ export class SocketService {
 
     private async handleAgentExecuteUpdate(
         socket: IAuthenticatedSocket,
-        data: IAgentStartUpdate,
+        data: IAgentExecuteUpdate,
     ) {
         const { documentId } = data;
 
         const agentsManager = AgentsManager.getInstance();
-        const success = await agentsManager.executeAgent(documentId);
+        const success = await agentsManager.executeAgent(documentId, true);
 
-        socket.to(documentId).emit("execute-agent", {
+        this.io!.to(documentId).emit("executed-agent", {
             documentId,
             success,
             userId: socket.userId,
@@ -263,6 +295,41 @@ export class SocketService {
         })
 
         this.updateUserActivity(documentId, socket.userId);
+    }
+
+    private async handleGetAgentExecuteingStatus(
+        socket: IAuthenticatedSocket,
+        data: IAgentExecutingStatusUpdate,
+    ) {
+        const { documentId } = data;
+
+        const agentsManager = AgentsManager.getInstance();
+        const isRunning = agentsManager.isAgentExecuting(documentId);
+
+        this.io!.to(documentId).emit("get-agent-executing-status", {
+            documentId,
+            isRunning,
+            userId: socket.userId,
+            timestamp: new Date().toISOString(),
+        })
+
+        this.updateUserActivity(documentId, socket.userId);
+    }
+
+    private async handleGetAgentLogs(
+        socket: IAuthenticatedSocket,
+        data: IAgentLogsQuery,
+    ) {
+        const { documentId } = data;
+
+        const logs = await documentsService.getAgentLogs(documentId);
+
+        socket.emit("give-agent-logs", {
+            documentId,
+            agentLogs: logs,
+            userId: socket.userId,
+            timestamp: new Date().toISOString(),
+        })
     }
 
     private async handleDocumentUpdate(

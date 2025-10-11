@@ -226,17 +226,18 @@ class DocumentsController {
 
             const agentsManager = AgentsManager.getInstance();
 
-            const success = await agentsManager.executeAgent(id);
+            const success = await agentsManager.executeAgent(id, true);
 
+            const agent = agentsManager.getAgent(id);
             if (success) {
                 res.json({ 
                     success: true,
-                    message: `Агент ${id} успешно выполнен!` 
+                    message: `Агент ${agent?.name} завершён.` 
                 });
             } else {
                 res.status(404).json({ 
                     success: false,
-                    error: `Агент ${id} не найден или не выполнен.` 
+                    error: `Агент ${agent?.name} не найден или не выполнен.` 
                 });
             }
         } catch (e) {

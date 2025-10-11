@@ -1,8 +1,8 @@
 import { IDocument } from "../models/document.model";
 import agentsDBService from "../services/agentsDB.service";
 import documentsService from "../services/documents.service";
+import { formatDate } from "../utils/date";
 import { Agent } from "./agent";
-import dayjs from 'dayjs';
 
 export class AgentsManager {
     private static instance: AgentsManager;
@@ -28,7 +28,7 @@ export class AgentsManager {
 
     private async loadAgents(): Promise<void> {
         try {
-            const records = await agentsDBService.getAllActiveAgents();
+            const records = await agentsDBService.getAllAgents();
       
             for (const record of records) {
                 await this.createAgentFromRecord(record);
@@ -79,14 +79,14 @@ export class AgentsManager {
       
             if (shouldExecute) {
                 console.log(
-                    `[${dayjs(Date()).format('DD.MM.YY HH.mm.ss')}] ⏰ Scheduler: executing agent ${agent.name}`
+                    `[${formatDate(Date())}] ⏰ Scheduler: executing agent ${agent.name}`
                 );
                 await this.executeAgentImmediately(agent.id);
             }
         }
     }
 
-    private async executeAgentImmediately(agentId: string): Promise<void> {
+    private async executeAgentImmediately(agentId: string, oneTime?: boolean): Promise<void> {
         const agent = this.agents.get(agentId);
         if (!agent || agent.status.isRunning) {
             return;
@@ -99,18 +99,26 @@ export class AgentsManager {
 
         try {
             await agentsDBService.run(agentId);
-            console.log(`--------⚙️  Executing agent ${agent.name} --------`);
+            const startLog = `[${formatDate(Date())}] --------⚙️  Executing agent ${agent.name} --------`;
+            await documentsService.createAgentLog(agentId, startLog);
+            console.log(startLog);
       
-            const result = await agent.processContent(record.data.content);
+            const result = await agent.processContent();
       
             if (result.success) {
-                console.log(`--------✅ Agent ${agent.name} executed successfully --------`);
+                const successLog = `[${formatDate(Date())}] --------✅ Agent ${agent.name} executed successfully --------`;
+                await documentsService.createAgentLog(agentId, successLog);
+                console.log(successLog);
             } else {
-                console.error(`--------⛔ Agent ${agent.name} failed. --------\n`, result.error);
+                const errorLog = `[${formatDate(Date())}] --------⛔ Agent ${agent.name} failed. --------\n${result.error}`;
+                await documentsService.createAgentLog(agentId, errorLog);
+                console.error(errorLog);
             }
 
-            await agentsDBService.updateLastRunDate(agentId);
-            await agentsDBService.updateNextRunDate(agentId);
+            if (!oneTime) {
+                await agentsDBService.updateLastRunDate(agentId);
+                await agentsDBService.updateNextRunDate(agentId);
+            }
 
             const updatedRecord = await agentsDBService.getAgent(agentId);
             if (updatedRecord) {
@@ -135,7 +143,7 @@ export class AgentsManager {
     }
 
     private async checkForUpdates(): Promise<void> {
-        const allRecords = await agentsDBService.getAllActiveAgents();
+        const allRecords = await agentsDBService.getAllAgents();
     
         for (const record of allRecords) {
             await this.createAgentFromRecord(record);
@@ -184,19 +192,23 @@ export class AgentsManager {
         return true;
     }
 
-    public async executeAgent(id: string): Promise<boolean> {
+    public async executeAgent(id: string, oneTime?: boolean): Promise<boolean> {
         const agent = this.agents.get(id);
         if (!agent || agent.status.isRunning) {
             return false;
         }
     
-        await this.executeAgentImmediately(id);
+        await this.executeAgentImmediately(id, oneTime);
 
         return true;
     }
 
     public getAgentsStatus() {
         return Array.from(this.agents.values()).map(agent => agent.status);
+    }
+
+    public isAgentExecuting(id: string) {
+        return !!this.agents.get(id)?.status.isRunning
     }
 
     public getAgent(id: string) {

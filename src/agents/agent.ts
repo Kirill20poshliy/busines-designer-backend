@@ -1,6 +1,8 @@
 import { IDocument } from '../models/document.model';
+import documentsService from '../services/documents.service';
 import apiQuery from '../utils/apiQuery';
 import { convertMilliseconds } from '../utils/convertMilliseconds';
+import { formatDate } from '../utils/date';
 import { parseDocumentContent } from '../utils/parseDocumentContent';
 import { sendAgentEmail } from '../utils/sendEmail';
 
@@ -46,16 +48,18 @@ export class Agent {
         this.record = record;
     }
 
-    public async processContent(content: string): Promise<{
+    public async processContent(): Promise<{
         success: boolean, 
         error: string | undefined
     }> {
         try {
+            const content = this.content;
             if(!content) {
                 throw new Error('Агент не может быть пустым');
             }
             
             const nodesData = parseDocumentContent(content);
+            const agentId = this.id
 
             for (let node of nodesData) {
                 const nodeType = node.type
@@ -68,7 +72,9 @@ export class Agent {
                             throw new Error('Обязательное поле "url" в запросе не заполнено!');
                         }
 
-                        console.log(`Sending request to: "${url}"...`);
+                        const requestLog = `[${formatDate(Date())}]: Sending request to: "${url}"...`;
+                        await documentsService.createAgentLog(agentId, requestLog);
+                        console.log(requestLog);
 
                         const body = data.body;
 
@@ -86,7 +92,9 @@ export class Agent {
                             throw new Error('Обязательное поле "email" в блоке "Письмо" не заполнено!');
                         }
 
-                        console.log(`Sending email to: ${email}...`);
+                        const emailLog = `[${formatDate(Date())}]: Sending email to: ${email}...`;
+                        await documentsService.createAgentLog(agentId, emailLog)
+                        console.log(emailLog);
 
                         const message = data.text
 
@@ -107,7 +115,10 @@ export class Agent {
 
                         const delay = convertMilliseconds(timer, timeType)
 
-                        console.log(`Waiting for ${delay/1000} sec...`);
+                        const delayLog = `[${formatDate(Date())}]: Waiting for ${delay/1000} sec...`
+                        await documentsService.createAgentLog(agentId, delayLog);
+                        console.log(delayLog);
+
                         await new Promise(resolve => setTimeout(resolve, delay));
                         break;
                     default:
