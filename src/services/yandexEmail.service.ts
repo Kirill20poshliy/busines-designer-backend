@@ -8,8 +8,13 @@ export class YandexEmailService {
     constructor() {
         this.transporter = nodemailer.createTransport({
             host: 'smtp.yandex.ru',
-            port: 465,
-            secure: true,
+            port: 587,
+            secure: false,
+            tls: {
+                servername: 'smtp.yandex.ru'
+            },
+            connectionTimeout: 10000,
+            socketTimeout: 15000,
             auth: {
                 user: process.env.YANDEX_EMAIL || 'qazasd2014@yandex.ru',
                 pass: process.env.YANDEX_APP_PASSWORD || 'odzrlxaljozhfeeo',

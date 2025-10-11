@@ -177,7 +177,7 @@ export class AgentsManager {
             if (updatedRecord) {
                 agent.updateRecord(updatedRecord);
             }
-            
+
             return result.success
         } catch (error) {
             console.error(`Unexpected error in agent ${agent.name}:`, error);
@@ -258,9 +258,9 @@ export class AgentsManager {
             return false;
         }
     
-        await this.executeAgentImmediately(id, oneTime);
+        const success = await this.executeAgentImmediately(id, oneTime);
 
-        return true;
+        return success;
     }
 
     public getAgentsStatus() {
