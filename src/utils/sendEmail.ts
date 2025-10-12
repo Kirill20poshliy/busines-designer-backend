@@ -4,6 +4,7 @@ import 'dotenv';
 export const sendAgentEmail = async (
     email: string, 
     text: string, 
+    agentName?: string,
 ): Promise<{success: boolean, error: string | undefined}> => {
     try {
         const apiKey = process.env.RESEND_KEY || 're_VfxJjkdy_9nWkAqewVRZiDRpu2W1Lc8Kg'
@@ -12,10 +13,13 @@ export const sendAgentEmail = async (
         const { error } = await resend.emails.send({
             from: 'onboarding@resend.dev',
             to: [email],
-            subject: 'Агент Business Designer завершил работу!',
+            subject: `[Business Designer]: Агент ${agentName ? agentName + ' ' : ''}.`,
             html: `
-                <div>
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h3 style="color: #333;">Уведомление агента ${agentName}.</h3>
                     <p>${text}</p>
+                    <br>
+                    <p>С уважением,<br>Команда <strong>Business Designer</strong></p>
                 </div>
             `,
         });
